@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EnsoAI 远程共享</title>
+<link rel="stylesheet" href="xterm.css">
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg-card: #1a1a1a;
+  --bg-input: #252525;
+  --bg-hover: #2a2a2a;
+  --text: #e0e0e0;
+  --text-muted: #888;
+  --text-dim: #666;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --success: #22c55e;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --border: #333;
+  --radius: 10px;
+  --radius-sm: 6px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Login */
+.login-page { display: flex; align-items: center; justify-content: center; height: 100vh; padding: 20px; }
+.login-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 40px 32px; width: 100%; max-width: 380px; text-align: center; }
+.login-card h1 { font-size: 24px; margin-bottom: 8px; font-weight: 600; }
+.login-card p { color: var(--text-muted); font-size: 14px; margin-bottom: 28px; }
+.login-card input { width: 100%; padding: 12px 16px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 15px; outline: none; transition: border-color 0.2s; }
+.login-card input:focus { border-color: var(--accent); }
+.login-card button { width: 100%; padding: 12px; margin-top: 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 15px; font-weight: 500; cursor: pointer; transition: background 0.2s; }
+.login-card button:hover { background: var(--accent-hover); }
+.login-card button:disabled { opacity: 0.5; cursor: not-allowed; }
+.login-error { color: var(--danger); font-size: 13px; margin-top: 12px; min-height: 20px; }
+
+/* Layout */
+.app { display: flex; flex-direction: column; height: 100vh; }
+.top-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; height: 48px; }
+.top-bar-left { display: flex; align-items: center; gap: 10px; }
+.top-bar h2 { font-size: 16px; font-weight: 600; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); display: inline-block; }
+.btn-icon { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 6px; border-radius: var(--radius-sm); font-size: 16px; line-height: 1; }
+.btn-icon:hover { background: var(--bg-hover); color: var(--text); }
+.content { flex: 1; overflow: hidden; position: relative; }
+
+/* Tabs */
+.tab-bar { display: flex; background: var(--bg-card); border-top: 1px solid var(--border); flex-shrink: 0; height: 56px; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 10px; transition: color 0.2s; padding: 6px 0; }
+.tab-item:hover { color: var(--text-muted); }
+.tab-item.active { color: var(--accent); }
+.tab-icon { font-size: 18px; line-height: 1; }
+
+/* Views */
+.view { display: none; height: 100%; overflow-y: auto; }
+.view.active { display: flex; flex-direction: column; }
+
+/* Sections */
+.section-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; flex-shrink: 0; }
+.section-header h3 { font-size: 15px; font-weight: 600; }
+.section-label { font-size: 12px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 16px 4px; flex-shrink: 0; }
+
+/* Buttons */
+.btn-sm { padding: 6px 14px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; transition: background 0.2s; }
+.btn-sm:hover { background: var(--accent-hover); }
+.btn-sm:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-outline { padding: 4px 10px; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+.btn-danger { padding: 4px 10px; background: none; border: 1px solid var(--danger); color: var(--danger); border-radius: var(--radius-sm); font-size: 12px; cursor: pointer; opacity: 0.7; }
+.btn-danger:hover { opacity: 1; }
+
+/* Cards */
+.card-list { display: flex; flex-direction: column; gap: 6px; padding: 0 16px 16px; }
+.card {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; cursor: pointer; transition: border-color 0.2s;
+}
+.card:hover { border-color: var(--accent); }
+.card.active { border-color: var(--accent); background: rgba(99,102,241,0.08); }
+.card-row { display: flex; align-items: center; gap: 10px; }
+.card-name { font-size: 14px; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-path { font-size: 12px; color: var(--text-dim); margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-badge { font-size: 11px; padding: 2px 8px; border-radius: 10px; flex-shrink: 0; }
+.card-badge.green { background: rgba(34,197,94,0.15); color: var(--success); }
+.card-badge.yellow { background: rgba(245,158,11,0.15); color: var(--warning); }
+
+/* Empty */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--text-dim); }
+.empty-state .icon { font-size: 40px; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+
+/* Input group */
+.input-row { display: flex; gap: 8px; padding: 0 16px 12px; flex-shrink: 0; }
+.input-row input { flex: 1; padding: 10px 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 14px; outline: none; }
+.input-row input:focus { border-color: var(--accent); }
+.input-row button { padding: 10px 18px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 14px; cursor: pointer; white-space: nowrap; }
+.input-row button:hover { background: var(--accent-hover); }
+
+/* Command bar */
+.command-bar { display: flex; gap: 8px; padding: 8px 16px; background: var(--bg-card); border-top: 1px solid var(--border); flex-shrink: 0; }
+.command-bar input { flex: 1; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; outline: none; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; }
+.command-bar input:focus { border-color: var(--accent); }
+.command-bar button { padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; }
+.command-bar button:hover { background: var(--accent-hover); }
+.command-bar button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* Git */
+.git-branch-bar { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; font-size: 13px; }
+.git-branch-name { font-weight: 600; color: var(--accent); }
+.git-ahead-behind { font-size: 12px; color: var(--text-dim); }
+.git-file-item { display: flex; align-items: center; gap: 8px; padding: 8px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.git-file-item:hover { background: var(--bg-hover); }
+.git-file-status { width: 20px; text-align: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.git-file-status.M { color: var(--warning); }
+.git-file-status.A { color: var(--success); }
+.git-file-status.D { color: var(--danger); }
+.git-file-status.R { color: #a78bfa; }
+.git-file-status.U { color: var(--text-dim); }
+.git-file-path { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; }
+.git-file-path:hover { color: var(--accent); }
+.git-file-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.git-commit-area { padding: 12px 16px; background: var(--bg-card); border-top: 1px solid var(--border); flex-shrink: 0; }
+.git-commit-area textarea { width: 100%; padding: 8px 12px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; outline: none; resize: vertical; min-height: 60px; font-family: inherit; }
+.git-commit-area textarea:focus { border-color: var(--accent); }
+.git-commit-area .commit-actions { display: flex; justify-content: flex-end; margin-top: 8px; gap: 8px; }
+.git-log-entry { display: flex; align-items: flex-start; gap: 10px; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+.git-log-hash { font-family: monospace; color: var(--accent); flex-shrink: 0; font-size: 12px; }
+.git-log-info { flex: 1; min-width: 0; }
+.git-log-msg { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.git-log-meta { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+/* Terminal */
+.terminal-view { display: none; flex-direction: column; height: 100%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--bg); }
+.terminal-view.active { display: flex; }
+.terminal-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.terminal-bar-info { font-size: 13px; color: var(--text-muted); font-family: monospace; }
+.terminal-container { flex: 1; overflow: hidden; padding: 4px; }
+.terminal-container .xterm { height: 100%; }
+
+/* File Browser */
+.path-bar { display: flex; align-items: center; gap: 4px; padding: 10px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text-muted); overflow-x: auto; white-space: nowrap; flex-shrink: 0; }
+.path-bar span { cursor: pointer; }
+.path-bar span:hover { color: var(--accent); }
+.path-sep { color: var(--text-dim); margin: 0 2px; }
+.file-list { display: flex; flex-direction: column; flex: 1; overflow-y: auto; }
+.file-item { display: flex; align-items: center; gap: 10px; padding: 11px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+.file-item:hover { background: var(--bg-hover); }
+.file-icon { font-size: 18px; width: 24px; text-align: center; flex-shrink: 0; }
+.file-name { flex: 1; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.file-size { font-size: 12px; color: var(--text-dim); flex-shrink: 0; }
+.dir-icon { color: #f0c040; }
+.file-icon-default { color: var(--text-dim); }
+
+/* Overlays */
+.overlay { display: none; flex-direction: column; height: 100%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 10; background: var(--bg); }
+.overlay.active { display: flex; }
+.overlay-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.overlay-title { font-size: 13px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+
+/* Diff viewer */
+.diff-content { flex: 1; overflow: auto; padding: 12px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+.diff-line-added { background: rgba(34,197,94,0.12); color: #86efac; }
+.diff-line-removed { background: rgba(239,68,68,0.12); color: #fca5a5; }
+.diff-line-context { color: var(--text-dim); }
+
+/* File viewer */
+.file-viewer-content { flex: 1; overflow: auto; padding: 12px; font-family: 'SF Mono', 'Fira Code', 'Consolas', monospace; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-break: break-all; }
+
+/* Settings */
+.settings-section { padding: 16px; }
+.settings-item { padding: 10px 0; border-bottom: 1px solid var(--border); }
+.settings-label { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
+.settings-value { font-size: 14px; font-family: monospace; word-break: break-all; }
+
+/* Responsive */
+@media (min-width: 768px) {
+  .login-card { padding: 48px 40px; }
+  .card-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Login Page -->
+<div id="loginPage" class="login-page">
+  <div class="login-card">
+    <h1>EnsoAI 远程共享</h1>
+    <p>输入访问令牌以连接到远程服务器</p>
+    <input type="text" id="tokenInput" placeholder="请输入访问令牌" autocomplete="off">
+    <button id="connectBtn" onclick="doConnect()">连接</button>
+    <div id="loginError" class="login-error"></div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="mainApp" class="app" style="display:none">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <span class="status-dot" id="statusDot"></span>
+      <h2>EnsoAI 远程共享</h2>
+    </div>
+    <button class="btn-icon" onclick="doDisconnect()" title="断开连接">✕</button>
+  </div>
+
+  <div class="content">
+    <!-- Projects View -->
+    <div id="projectsView" class="view active">
+      <div class="section-header">
+        <h3>项目管理</h3>
+        <button class="btn-sm" onclick="showAddProject()">+ 导入</button>
+      </div>
+      <div id="addProjectArea" style="display:none">
+        <div class="input-row">
+          <input type="text" id="projectPathInput" placeholder="输入项目绝对路径">
+          <button onclick="addProject()">导入</button>
+        </div>
+      </div>
+      <div id="projectList" class="card-list">
+        <div class="empty-state">
+          <div class="icon">📂</div>
+          <p>暂无项目</p>
+          <p style="margin-top:6px;font-size:13px;color:var(--text-dim)">点击「导入」添加 Git 项目</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions View -->
+    <div id="sessionsView" class="view">
+      <div class="section-header">
+        <h3>终端会话</h3>
+        <button class="btn-sm" onclick="createSession()">+ 新建</button>
+      </div>
+      <div style="flex:1;overflow-y:auto">
+        <div class="section-label">本地会话</div>
+        <div id="localSessionList" class="card-list"></div>
+        <div class="section-label">远程会话</div>
+        <div id="remoteSessionList" class="card-list"></div>
+      </div>
+      <div class="command-bar">
+        <input type="text" id="commandInput" placeholder="运行命令（需先选择项目）" disabled>
+        <button id="commandRunBtn" onclick="runCommand()" disabled>运行</button>
+      </div>
+    </div>
+
+    <!-- Git View -->
+    <div id="gitView" class="view">
+      <div id="gitContent" style="flex:1;overflow-y:auto">
+        <div id="gitEmpty" class="empty-state">
+          <div class="icon">🔀</div>
+          <p>请先在「项目」中选择一个项目</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Files View -->
+    <div id="filesView" class="view">
+      <div class="path-bar" id="pathBar"></div>
+      <div id="fileList" class="file-list"></div>
+    </div>
+
+    <!-- Settings View -->
+    <div id="settingsView" class="view">
+      <div class="settings-section">
+        <div class="settings-item">
+          <div class="settings-label">连接地址</div>
+          <div class="settings-value" id="settingsUrl">-</div>
+        </div>
+        <div class="settings-item">
+          <div class="settings-label">当前项目</div>
+          <div class="settings-value" id="settingsProject">未选择</div>
+        </div>
+        <div style="padding-top:20px;text-align:center;color:var(--text-dim)">
+          <p style="font-size:14px;margin-bottom:4px">EnsoAI 远程共享</p>
+          <p style="font-size:12px">WebSocket + bore 隧道</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Terminal Overlay -->
+    <div id="terminalView" class="terminal-view">
+      <div class="terminal-bar">
+        <button class="btn-icon" onclick="closeTerminal()">← 返回</button>
+        <span class="terminal-bar-info" id="terminalInfo"></span>
+        <span></span>
+      </div>
+      <div class="terminal-container" id="terminalContainer"></div>
+    </div>
+
+    <!-- File Viewer Overlay -->
+    <div id="fileViewer" class="overlay">
+      <div class="overlay-header">
+        <button class="btn-icon" onclick="closeOverlay('fileViewer')">← 返回</button>
+        <span class="overlay-title" id="fileViewerName"></span>
+        <span></span>
+      </div>
+      <pre class="file-viewer-content" id="fileViewerContent"></pre>
+    </div>
+
+    <!-- Diff Viewer Overlay -->
+    <div id="diffViewer" class="overlay">
+      <div class="overlay-header">
+        <button class="btn-icon" onclick="closeOverlay('diffViewer')">← 返回</button>
+        <span class="overlay-title" id="diffViewerName"></span>
+        <span></span>
+      </div>
+      <div class="diff-content" id="diffViewerContent"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-item active" onclick="switchTab('projects', this)">
+      <span class="tab-icon">📂</span><span>项目</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('sessions', this)">
+      <span class="tab-icon">⌨</span><span>会话</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('git', this)">
+      <span class="tab-icon">🔀</span><span>Git</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('files', this)">
+      <span class="tab-icon">📁</span><span>文件</span>
+    </button>
+    <button class="tab-item" onclick="switchTab('settings', this)">
+      <span class="tab-icon">⚙</span><span>设置</span>
+    </button>
+  </div>
+</div>
+
+<script src="xterm.min.js"></script>
+<script src="xterm-addon-fit.min.js"></script>
+<script>
+(function() {
+  'use strict';
+
+  let ws = null;
+  let term = null;
+  let fitAddon = null;
+  let currentSessionId = null;
+  let currentFilePath = '/';
+  let pingTimer = null;
+
+  // App state
+  let projects = [];
+  let activeProject = null; // { name, path, isValid }
+  let gitStatus = null;
+  let gitChanges = null;
+  let gitLogEntries = [];
+
+  // --- Connection ---
+
+  window.doConnect = function() {
+    var token = document.getElementById('tokenInput').value.trim();
+    if (!token) { document.getElementById('loginError').textContent = '请输入令牌'; return; }
+
+    var btn = document.getElementById('connectBtn');
+    btn.disabled = true; btn.textContent = '连接中...';
+    document.getElementById('loginError').textContent = '';
+
+    var proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+    var url = proto + '//' + location.host + '/ws?token=' + encodeURIComponent(token);
+
+    try { ws = new WebSocket(url); } catch(e) { showError('无法建立连接'); resetBtn(); return; }
+
+    ws.onopen = function() {
+      sessionStorage.setItem('rs-token', token);
+      showMainApp();
+      startPing();
+      document.getElementById('settingsUrl').textContent = location.origin;
+      send({ type: 'session:list' });
+      send({ type: 'file:list', path: currentFilePath });
+      send({ type: 'project:list' });
+    };
+    ws.onmessage = function(e) { try { handleMessage(JSON.parse(e.data)); } catch(err) {} };
+    ws.onclose = function(e) {
+      if (e.code === 1008 || e.code === 4011) { showError('令牌无效'); resetBtn(); }
+      else showLogin();
+      stopPing();
+    };
+    ws.onerror = function() { showError('连接失败'); resetBtn(); };
+  };
+
+  window.doDisconnect = function() { if (ws) { ws.close(); ws = null; } showLogin(); stopPing(); };
+
+  function showError(msg) { document.getElementById('loginError').textContent = msg; }
+  function resetBtn() { var b = document.getElementById('connectBtn'); b.disabled = false; b.textContent = '连接'; }
+  function showMainApp() { document.getElementById('loginPage').style.display = 'none'; document.getElementById('mainApp').style.display = 'flex'; }
+  function showLogin() { document.getElementById('loginPage').style.display = 'flex'; document.getElementById('mainApp').style.display = 'none'; closeTerminal(); }
+  function send(msg) { if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(msg)); }
+  function startPing() { pingTimer = setInterval(function() { send({ type: 'ping' }); }, 30000); }
+  function stopPing() { if (pingTimer) { clearInterval(pingTimer); pingTimer = null; } }
+
+  // --- Message Handling ---
+
+  function handleMessage(msg) {
+    switch (msg.type) {
+      case 'session:list': renderSessions(msg.sessions); break;
+      case 'session:created': openTerminal(msg.session.id, msg.session.cwd); break;
+      case 'session:connected': break;
+      case 'session:data':
+        if (term && msg.sessionId === currentSessionId) term.write(msg.data);
+        break;
+      case 'session:exited':
+        if (msg.sessionId === currentSessionId && term) term.write('\r\n\x1b[90m[ 会话已退出 ]\x1b[0m\r\n');
+        send({ type: 'session:list' });
+        break;
+      case 'session:error': alert(msg.error || '会话错误'); break;
+      case 'file:list': renderFileList(msg.path, msg.entries); break;
+      case 'file:read': showFileContent(msg.path, msg.content); break;
+      case 'file:error': alert(msg.error || '文件错误'); break;
+      case 'project:list': renderProjects(msg.projects); break;
+      case 'project:added': projects.push(msg.project); renderProjects(projects); break;
+      case 'project:removed':
+        projects = projects.filter(function(p) { return p.path !== msg.path; });
+        if (activeProject && activeProject.path === msg.path) { activeProject = null; updateActiveProjectUI(); }
+        renderProjects(projects);
+        break;
+      case 'project:error': alert(msg.error); break;
+      case 'git:status':
+        gitStatus = msg.status;
+        renderGitView();
+        break;
+      case 'git:log': gitLogEntries = msg.entries; renderGitLog(); break;
+      case 'git:staged':
+      case 'git:unstaged':
+        // Refresh status after stage/unstage
+        if (activeProject) {
+          send({ type: 'git:status', workdir: activeProject.path });
+          send({ type: 'git:fileChanges', workdir: activeProject.path });
+        }
+        break;
+      case 'git:committed':
+        alert('提交成功: ' + msg.hash);
+        if (activeProject) {
+          send({ type: 'git:status', workdir: activeProject.path });
+          send({ type: 'git:log', workdir: activeProject.path });
+          send({ type: 'git:fileChanges', workdir: activeProject.path });
+        }
+        document.getElementById('commitMsg').value = '';
+        break;
+      case 'git:diff': showDiff(msg.filePath, msg.diff); break;
+      case 'git:fileChanges': gitChanges = msg.result; renderGitChanges(); break;
+      case 'git:error': alert('Git 错误: ' + msg.error); break;
+      case 'command:started':
+        send({ type: 'session:list' });
+        break;
+      case 'error': alert(msg.message); break;
+    }
+  }
+
+  // --- Project Management ---
+
+  function renderProjects(list) {
+    projects = list || [];
+    var c = document.getElementById('projectList');
+    if (!projects.length) {
+      c.innerHTML = '<div class="empty-state"><div class="icon">📂</div><p>暂无项目</p><p style="margin-top:6px;font-size:13px;color:var(--text-dim)">点击「导入」添加 Git 项目</p></div>';
+      return;
+    }
+    c.innerHTML = projects.map(function(p, i) {
+      var isActive = activeProject && activeProject.path === p.path;
+      var badge = p.isValid ? '<span class="card-badge green">Git</span>' : '<span class="card-badge yellow">无效</span>';
+      return '<div class="card' + (isActive ? ' active' : '') + '" onclick="selectProject(' + i + ')">' +
+        '<div class="card-row"><span class="card-name">' + esc(p.name) + '</span>' + badge + '</div>' +
+        '<div class="card-path">' + esc(p.path) + '</div>' +
+        (isActive ? '' : '') +
+      '</div>';
+    }).join('');
+    updateCommandBar();
+  }
+
+  window.showAddProject = function() {
+    var area = document.getElementById('addProjectArea');
+    area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    if (area.style.display !== 'none') document.getElementById('projectPathInput').focus();
+  };
+
+  window.addProject = function() {
+    var p = document.getElementById('projectPathInput').value.trim();
+    if (!p) return;
+    send({ type: 'project:add', path: p });
+    document.getElementById('projectPathInput').value = '';
+    document.getElementById('addProjectArea').style.display = 'none';
+  };
+
+  window.selectProject = function(index) {
+    activeProject = projects[index];
+    updateActiveProjectUI();
+    renderProjects(projects);
+    // Fetch git data
+    send({ type: 'git:status', workdir: activeProject.path });
+    send({ type: 'git:log', workdir: activeProject.path });
+    send({ type: 'git:fileChanges', workdir: activeProject.path });
+    // Set files view to project root
+    currentFilePath = activeProject.path;
+    document.getElementById('settingsProject').textContent = activeProject.name;
+  };
+
+  function updateActiveProjectUI() {
+    updateCommandBar();
+    document.getElementById('settingsProject').textContent = activeProject ? activeProject.name : '未选择';
+  }
+
+  function updateCommandBar() {
+    var input = document.getElementById('commandInput');
+    var btn = document.getElementById('commandRunBtn');
+    var enabled = !!activeProject;
+    input.disabled = !enabled;
+    btn.disabled = !enabled;
+    input.placeholder = enabled ? '在 ' + activeProject.name + ' 中运行命令...' : '运行命令（需先选择项目）';
+  }
+
+  // --- Sessions ---
+
+  function renderSessions(sessions) {
+    var local = (sessions || []).filter(function(s) { return s.isLocal; });
+    var remote = (sessions || []).filter(function(s) { return !s.isLocal; });
+
+    var lc = document.getElementById('localSessionList');
+    var rc = document.getElementById('remoteSessionList');
+
+    lc.innerHTML = local.length ? local.map(function(s) {
+      return '<div class="card" onclick="openTerminal(\'' + escAttr(s.id) + '\', \'' + escAttr(s.cwd) + '\')">' +
+        '<div class="card-name">' + esc(s.id) + ' <span style="color:var(--text-dim);font-size:12px">(本地)</span></div>' +
+        '<div class="card-path">' + esc(shortCwd(s.cwd)) + '</div></div>';
+    }).join('') : '<div class="empty-state" style="padding:20px"><p style="font-size:13px">无本地会话</p></div>';
+
+    rc.innerHTML = remote.length ? remote.map(function(s) {
+      return '<div class="card" onclick="openTerminal(\'' + escAttr(s.id) + '\', \'' + escAttr(s.cwd) + '\')">' +
+        '<div class="card-row"><span class="card-name">' + esc(s.id) + '</span>' +
+        '<button class="btn-danger" onclick="event.stopPropagation();destroySession(\'' + escAttr(s.id) + '\')">销毁</button></div>' +
+        '<div class="card-path">' + esc(shortCwd(s.cwd)) + '</div></div>';
+    }).join('') : '<div class="empty-state" style="padding:20px"><p style="font-size:13px">无远程会话</p></div>';
+  }
+
+  window.createSession = function() {
+    var cwd = activeProject ? activeProject.path : undefined;
+    send({ type: 'session:create', cwd: cwd, cols: 80, rows: 24 });
+  };
+
+  window.destroySession = function(id) {
+    send({ type: 'session:destroy', sessionId: id });
+  };
+
+  window.runCommand = function() {
+    var cmd = document.getElementById('commandInput').value.trim();
+    if (!cmd || !activeProject) return;
+    send({ type: 'command:run', workdir: activeProject.path, command: cmd });
+    document.getElementById('commandInput').value = '';
+  };
+
+  // --- Terminal ---
+
+  window.openTerminal = function(sessionId, cwd) {
+    currentSessionId = sessionId;
+    document.getElementById('terminalView').classList.add('active');
+    document.getElementById('terminalInfo').textContent = sessionId;
+    if (term) { term.dispose(); term = null; }
+
+    term = new Terminal({
+      cursorBlink: true, fontSize: 14,
+      fontFamily: "'SF Mono','Fira Code','Consolas',monospace",
+      theme: { background: '#0f0f0f', foreground: '#e0e0e0', cursor: '#6366f1', selectionBackground: '#6366f144' },
+      allowProposedApi: true,
+    });
+    fitAddon = new FitAddon.FitAddon();
+    term.loadAddon(fitAddon);
+    term.open(document.getElementById('terminalContainer'));
+    setTimeout(function() { try { fitAddon.fit(); } catch(e) {} }, 50);
+    term.onData(function(data) { send({ type: 'session:write', sessionId: sessionId, data: data }); });
+    term.onResize(function(size) { send({ type: 'session:resize', sessionId: sessionId, cols: size.cols, rows: size.rows }); });
+    send({ type: 'session:connect', sessionId: sessionId });
+  };
+
+  window.closeTerminal = function() {
+    document.getElementById('terminalView').classList.remove('active');
+    if (currentSessionId) send({ type: 'session:disconnect', sessionId: currentSessionId });
+    if (term) { term.dispose(); term = null; }
+    currentSessionId = null;
+  };
+
+  window.addEventListener('resize', function() { if (fitAddon && term) try { fitAddon.fit(); } catch(e) {} });
+
+  // --- Git View ---
+
+  function refreshGit() {
+    if (!activeProject) return;
+    send({ type: 'git:status', workdir: activeProject.path });
+    send({ type: 'git:log', workdir: activeProject.path });
+    send({ type: 'git:fileChanges', workdir: activeProject.path });
+  }
+
+  function renderGitView() {
+    var c = document.getElementById('gitContent');
+    if (!activeProject) {
+      c.innerHTML = '<div id="gitEmpty" class="empty-state"><div class="icon">🔀</div><p>请先在「项目」中选择一个项目</p></div>';
+      return;
+    }
+    if (!gitStatus) { c.innerHTML = '<div class="empty-state"><p>加载中...</p></div>'; return; }
+
+    var branch = gitStatus.current || 'HEAD';
+    var ab = '';
+    if (gitStatus.ahead > 0) ab += ' ↑' + gitStatus.ahead;
+    if (gitStatus.behind > 0) ab += ' ↓' + gitStatus.behind;
+    var clean = gitStatus.isClean;
+
+    var html = '<div class="git-branch-bar">' +
+      '<span>分支:</span> <span class="git-branch-name">' + esc(branch) + '</span>' +
+      (ab ? '<span class="git-ahead-behind">' + ab + '</span>' : '') +
+      (clean ? '<span class="card-badge green">干净</span>' : '<span class="card-badge yellow">有变更</span>') +
+    '</div>';
+
+    // Staged files
+    html += '<div class="section-label">已暂存</div>';
+    if (gitChanges) {
+      var staged = gitChanges.changes.filter(function(c) { return c.staged; });
+      html += staged.length ? staged.map(function(c) {
+        return '<div class="git-file-item">' +
+          '<span class="git-file-status ' + c.status + '">' + c.status + '</span>' +
+          '<span class="git-file-path" onclick="showFileDiff(\'' + escAttr(c.path) + '\', true)">' + esc(c.path) + '</span>' +
+          '<div class="git-file-actions"><button class="btn-outline" onclick="unstageFile(\'' + escAttr(c.path) + '\')">−</button></div>' +
+        '</div>';
+      }).join('') : '<div style="padding:8px 16px;color:var(--text-dim);font-size:13px">无暂存文件</div>';
+    }
+
+    // Unstaged files
+    html += '<div class="section-label">未暂存</div>';
+    if (gitChanges) {
+      var unstaged = gitChanges.changes.filter(function(c) { return !c.staged; });
+      html += unstaged.length ? unstaged.map(function(c) {
+        return '<div class="git-file-item">' +
+          '<span class="git-file-status ' + c.status + '">' + c.status + '</span>' +
+          '<span class="git-file-path" onclick="showFileDiff(\'' + escAttr(c.path) + '\', false)">' + esc(c.path) + '</span>' +
+          '<div class="git-file-actions"><button class="btn-outline" onclick="stageFile(\'' + escAttr(c.path) + '\')">+</button></div>' +
+        '</div>';
+      }).join('') : '<div style="padding:8px 16px;color:var(--text-dim);font-size:13px">无未暂存文件</div>';
+    }
+
+    // Commit area
+    html += '<div class="git-commit-area">' +
+      '<textarea id="commitMsg" placeholder="输入提交信息..."></textarea>' +
+      '<div class="commit-actions"><button class="btn-sm" onclick="doCommit()">提交</button></div>' +
+    '</div>';
+
+    // Log
+    html += '<div class="section-label">提交历史</div><div id="gitLogContainer"></div>';
+
+    c.innerHTML = html;
+    renderGitLog();
+  }
+
+  function renderGitLog() {
+    var c = document.getElementById('gitLogContainer');
+    if (!c) return;
+    if (!gitLogEntries || !gitLogEntries.length) {
+      c.innerHTML = '<div style="padding:8px 16px;color:var(--text-dim);font-size:13px">无提交记录</div>';
+      return;
+    }
+    c.innerHTML = gitLogEntries.map(function(e) {
+      var shortHash = e.hash.substring(0, 7);
+      var shortMsg = e.message.split('\n')[0];
+      return '<div class="git-log-entry">' +
+        '<span class="git-log-hash">' + esc(shortHash) + '</span>' +
+        '<div class="git-log-info">' +
+          '<div class="git-log-msg">' + esc(shortMsg) + '</div>' +
+          '<div class="git-log-meta">' + esc(e.author_name) + ' · ' + relativeTime(e.date) + '</div>' +
+        '</div></div>';
+    }).join('');
+  }
+
+  function renderGitChanges() {
+    // Re-render git view with updated changes
+    if (activeProject && gitStatus) renderGitView();
+  }
+
+  window.stageFile = function(filePath) {
+    if (!activeProject) return;
+    send({ type: 'git:stage', workdir: activeProject.path, paths: [filePath] });
+  };
+
+  window.unstageFile = function(filePath) {
+    if (!activeProject) return;
+    send({ type: 'git:unstage', workdir: activeProject.path, paths: [filePath] });
+  };
+
+  window.doCommit = function() {
+    if (!activeProject) return;
+    var msg = document.getElementById('commitMsg');
+    if (!msg) return;
+    var message = msg.value.trim();
+    if (!message) { alert('请输入提交信息'); return; }
+    send({ type: 'git:commit', workdir: activeProject.path, message: message });
+  };
+
+  window.showFileDiff = function(filePath, staged) {
+    if (!activeProject) return;
+    send({ type: 'git:diff', workdir: activeProject.path, filePath: filePath, staged: staged });
+  };
+
+  function showDiff(filePath, diff) {
+    document.getElementById('diffViewer').classList.add('active');
+    document.getElementById('diffViewerName').textContent = filePath;
+
+    if (diff.isBinary) {
+      document.getElementById('diffViewerContent').textContent = '（二进制文件，无法显示差异）';
+      return;
+    }
+
+    // Simple unified diff from original vs modified
+    var origLines = diff.original.split('\n');
+    var modLines = diff.modified.split('\n');
+    var html = '';
+
+    // Very simple diff: show all modified lines
+    var maxLen = Math.max(origLines.length, modLines.length);
+    // For a quick display, show the modified version with added/removed markers
+    // A proper diff algorithm would be better, but for a self-contained file this works
+    if (diff.original === '' && diff.modified !== '') {
+      // New file
+      html = modLines.map(function(l) { return '<div class="diff-line-added">+ ' + esc(l) + '</div>'; }).join('');
+    } else if (diff.original !== '' && diff.modified === '') {
+      // Deleted file
+      html = origLines.map(function(l) { return '<div class="diff-line-removed">- ' + esc(l) + '</div>'; }).join('');
+    } else {
+      // Modified: show both sides simply
+      var origSet = new Set(origLines);
+      var modSet = new Set(modLines);
+
+      // Show removed lines
+      origLines.forEach(function(l) {
+        if (!modSet.has(l) || modLines.indexOf(l) !== origLines.indexOf(l)) {
+          html += '<div class="diff-line-removed">- ' + esc(l) + '</div>';
+        }
+      });
+      // Show added lines
+      modLines.forEach(function(l) {
+        if (!origSet.has(l) || origLines.indexOf(l) !== modLines.indexOf(l)) {
+          html += '<div class="diff-line-added">+ ' + esc(l) + '</div>';
+        }
+      });
+
+      // If no differences found, show full content
+      if (!html) {
+        html = modLines.map(function(l) { return '<div class="diff-line-context">  ' + esc(l) + '</div>'; }).join('');
+      }
+    }
+
+    document.getElementById('diffViewerContent').innerHTML = html;
+  }
+
+  // --- File Browsing ---
+
+  function renderFileList(dirPath, entries) {
+    currentFilePath = dirPath;
+    renderPathBar(dirPath);
+    var c = document.getElementById('fileList');
+    if (!entries || !entries.length) {
+      c.innerHTML = '<div class="empty-state"><div class="icon">📁</div><p>目录为空</p></div>';
+      return;
+    }
+    entries.sort(function(a, b) {
+      if (a.isDirectory && !b.isDirectory) return -1;
+      if (!a.isDirectory && b.isDirectory) return 1;
+      return a.name.localeCompare(b.name);
+    });
+    c.innerHTML = entries.map(function(e) {
+      var icon = e.isDirectory ? '📂' : '📄';
+      var cls = e.isDirectory ? 'dir-icon' : 'file-icon-default';
+      var sz = e.isDirectory ? '' : fmtSize(e.size);
+      var act = e.isDirectory
+        ? 'onclick="navDir(\'' + escAttr(dirPath) + '\',\'' + escAttr(e.name) + '\')"'
+        : 'onclick="readFile(\'' + escAttr(dirPath) + '\',\'' + escAttr(e.name) + '\')"';
+      return '<div class="file-item" ' + act + '>' +
+        '<span class="file-icon ' + cls + '">' + icon + '</span>' +
+        '<span class="file-name">' + esc(e.name) + '</span>' +
+        '<span class="file-size">' + sz + '</span></div>';
+    }).join('');
+  }
+
+  function renderPathBar(dirPath) {
+    var parts = dirPath.replace(/\\/g, '/').split('/').filter(Boolean);
+    var html = '<span onclick="navTo(\'/\')">/</span>';
+    var acc = '';
+    parts.forEach(function(p) {
+      acc += '/' + p;
+      html += '<span class="path-sep">/</span><span onclick="navTo(\'' + escAttr(acc) + '\')">' + esc(p) + '</span>';
+    });
+    document.getElementById('pathBar').innerHTML = html;
+  }
+
+  window.navDir = function(base, name) { send({ type: 'file:list', path: base.replace(/\\/g,'/').replace(/\/$/,'') + '/' + name }); };
+  window.navTo = function(p) { send({ type: 'file:list', path: p }); };
+  window.readFile = function(base, name) { send({ type: 'file:read', path: base.replace(/\\/g,'/').replace(/\/$/,'') + '/' + name }); };
+
+  function showFileContent(filePath, content) {
+    document.getElementById('fileViewer').classList.add('active');
+    document.getElementById('fileViewerName').textContent = filePath.split(/[\/\\]/).pop();
+    document.getElementById('fileViewerContent').textContent = content;
+  }
+
+  // --- Tab Switching ---
+
+  window.switchTab = function(tab, el) {
+    document.querySelectorAll('.tab-item').forEach(function(t) { t.classList.remove('active'); });
+    document.querySelectorAll('.view').forEach(function(v) { v.classList.remove('active'); });
+    el.classList.add('active');
+    document.getElementById(tab + 'View').classList.add('active');
+
+    if (tab === 'sessions') send({ type: 'session:list' });
+    else if (tab === 'files') send({ type: 'file:list', path: currentFilePath });
+    else if (tab === 'git') refreshGit();
+    else if (tab === 'projects') send({ type: 'project:list' });
+  };
+
+  // --- Overlay ---
+
+  window.closeOverlay = function(id) { document.getElementById(id).classList.remove('active'); };
+
+  // --- Utilities ---
+
+  function shortCwd(cwd) { var p = cwd.split(/[\/\\]/).filter(Boolean); return p.slice(-2).join('/') || cwd; }
+  function fmtSize(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b/1024).toFixed(1) + ' KB'; return (b/1048576).toFixed(1) + ' MB'; }
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function escAttr(s) { return String(s).replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+  function relativeTime(dateStr) {
+    var d = new Date(dateStr);
+    var now = Date.now();
+    var diff = Math.floor((now - d.getTime()) / 1000);
+    if (diff < 60) return '刚刚';
+    if (diff < 3600) return Math.floor(diff/60) + '分钟前';
+    if (diff < 86400) return Math.floor(diff/3600) + '小时前';
+    if (diff < 2592000) return Math.floor(diff/86400) + '天前';
+    return d.toLocaleDateString('zh-CN');
+  }
+
+  // --- Init ---
+  window.addEventListener('load', function() {
+    var saved = sessionStorage.getItem('rs-token');
+    if (saved) document.getElementById('tokenInput').value = saved;
+    document.getElementById('tokenInput').focus();
+    document.getElementById('tokenInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') window.doConnect(); });
+    document.getElementById('commandInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') window.runCommand(); });
+    document.getElementById('projectPathInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') window.addProject(); });
+  });
+
+})();
+</script>
+</body>
+</html>
