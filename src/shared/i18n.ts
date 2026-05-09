@@ -1091,6 +1091,19 @@ export const zhTranslations: Record<string, string> = {
   'Enable Happy Agent': '启用 Happy Agent',
   'Use Happy to run supported agents': '使用 Happy 运行支持的 Agent',
   'Install Happy globally to enable this feature': '全局安装 Happy 以启用此功能',
+
+  // Self-Built Remote Sharing
+  'Self-Built Sharing': '自建共享',
+  'Self-Built Remote Sharing': '自建远程共享',
+  'Built-in WebSocket server for sharing terminals and files via browser':
+    '内置 WebSocket 服务器，通过浏览器共享终端和文件',
+  'Enable Remote Sharing': '启用远程共享',
+  'Start WebSocket server for remote access': '启动 WebSocket 服务器以供远程访问',
+  'Public Access (Bore)': '公网访问 (Bore)',
+  'Expose local server to the internet via bore tunnel': '通过 bore 隧道将本地服务器暴露到互联网',
+  'Bore relay server address': 'Bore 中继服务器地址',
+  'Access token for web UI authentication': 'Web UI 认证访问令牌',
+  'Bore Server': 'Bore 服务器',
   // PR Worktree
   'From branch': '从分支',
   'From PR': '从 PR',

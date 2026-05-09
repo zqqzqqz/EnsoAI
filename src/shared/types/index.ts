@@ -9,6 +9,16 @@ export * from './ipc';
 export * from './mcp';
 export * from './plugins';
 export * from './prompts';
+export type {
+  BoreStatus,
+  ClientMessage,
+  ProjectInfo,
+  RemoteSessionInfo,
+  RemoteShareConfig,
+  RemoteShareSettings,
+  RemoteShareStatus,
+  ServerMessage,
+} from './remoteShare';
 export * from './search';
 export * from './shell';
 export * from './tempWorkspace';

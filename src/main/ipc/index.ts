@@ -22,8 +22,14 @@ import {
 } from './files';
 import { clearAllGitServices, registerGitHandlers } from './git';
 import { autoStartHapi, cleanupHapi, cleanupHapiSync, registerHapiHandlers } from './hapi';
+import {
+  autoStartRemoteShare,
+  cleanupRemoteShare,
+  registerRemoteShareHandlers,
+} from './remoteShare';
 
 export { autoStartHapi };
+export { autoStartRemoteShare };
 
 import { registerLogHandlers } from './log';
 import { registerNotificationHandlers } from './notification';
@@ -58,6 +64,7 @@ export function registerIpcHandlers(): void {
   registerUpdaterHandlers();
   registerSearchHandlers();
   registerHapiHandlers();
+  registerRemoteShareHandlers();
   registerClaudeProviderHandlers();
   registerClaudeConfigHandlers();
   registerClaudeCompletionsHandlers();
@@ -90,6 +97,8 @@ export async function cleanupAllResources(): Promise<void> {
       safeRun(() => cleanupExecInPtys(4000), 'execInPty'),
       // Hapi server + runner + cloudflared
       safeRun(() => cleanupHapi(4000), 'hapi'),
+      // Remote share + bore
+      safeRun(() => cleanupRemoteShare(), 'remoteShare'),
       // Interactive terminal PTY sessions
       safeRun(async () => {
         try {
@@ -138,6 +147,13 @@ export function cleanupAllResourcesSync(): void {
 
   // Kill Hapi/Cloudflared processes (sync)
   cleanupHapiSync();
+
+  // Kill Remote Share/Bore processes (sync via cleanup)
+  try {
+    cleanupRemoteShare();
+  } catch {
+    /* ignore */
+  }
 
   // Kill tmux enso server (sync)
   cleanupTmuxSync();

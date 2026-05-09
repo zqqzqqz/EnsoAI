@@ -24,6 +24,7 @@ import {
   defaultMainTabKeybindings,
   defaultProxySettings,
   defaultQuickTerminalSettings,
+  defaultRemoteShareSettings,
   defaultSearchKeybindings,
   defaultSourceControlKeybindings,
   defaultTodoPolishSettings,
@@ -154,6 +155,7 @@ function getInitialState() {
     // App Settings
     autoUpdateEnabled: true,
     hapiSettings: defaultHapiSettings,
+    remoteShareSettings: defaultRemoteShareSettings,
     defaultWorktreePath: '',
     proxySettings: defaultProxySettings,
     autoCreateSessionOnActivate: false,
@@ -487,6 +489,11 @@ export const useSettingsStore = create<SettingsState>()(
       setHapiSettings: (settings) =>
         set((state) => ({
           hapiSettings: { ...state.hapiSettings, ...settings },
+        })),
+
+      setRemoteShareSettings: (settings) =>
+        set((state) => ({
+          remoteShareSettings: { ...state.remoteShareSettings, ...settings },
         })),
 
       setDefaultWorktreePath: (defaultWorktreePath) => set({ defaultWorktreePath }),

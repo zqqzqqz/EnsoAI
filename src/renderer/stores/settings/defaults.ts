@@ -15,6 +15,7 @@ import type {
   HapiSettings,
   MainTabKeybindings,
   QuickTerminalSettings,
+  RemoteShareSettings,
   SearchKeybindings,
   SourceControlKeybindings,
   StatusLineFieldSettings,
@@ -249,6 +250,15 @@ export const defaultHapiSettings: HapiSettings = {
   runnerEnabled: false,
   // Happy defaults
   happyEnabled: false,
+};
+
+// Default Remote Share (Self-Built) settings
+export const defaultRemoteShareSettings: RemoteShareSettings = {
+  enabled: false,
+  port: 3007,
+  authToken: '',
+  boreEnabled: false,
+  boreServer: 'bore.pub',
 };
 
 // Default proxy settings

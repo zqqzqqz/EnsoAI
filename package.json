@@ -12,7 +12,7 @@
   "packageManager": "pnpm@10.26.2",
   "scripts": {
     "dev": "node scripts/dev.js",
-    "build": "electron-vite build",
+    "build": "electron-vite build && node scripts/copy-web-assets.cjs",
     "preview": "electron-vite preview",
     "start": "electron-vite preview",
     "postinstall": "electron-builder install-app-deps",

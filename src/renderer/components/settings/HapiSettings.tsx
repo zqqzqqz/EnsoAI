@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useI18n } from '@/i18n';
 import { useSettingsStore } from '@/stores/settings';
+import { SelfBuiltSharingTab } from './SelfBuiltSharingTab';
 
 interface HapiStatus {
   running: boolean;
@@ -234,353 +235,391 @@ export function HapiSettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <div>
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-medium">Hapi</h3>
-          <button
-            type="button"
-            onClick={() => window.electronAPI.shell.openExternal('https://github.com/tiann/hapi')}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            title="GitHub"
-          >
-            <Github className="h-4 w-4" />
-          </button>
-          {hapiGlobal.installed ? (
-            <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400">
-              v{hapiGlobal.version || '?'}
-            </span>
-          ) : (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-              npx
-            </span>
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {t('Share agent sessions remotely via Web and Telegram')}
-        </p>
-      </div>
+    <div className="space-y-4">
+      {/* Top-level tabs: Hapi vs Self-Built */}
+      <Tabs defaultValue="hapi">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="hapi">Hapi</TabsTrigger>
+          <TabsTrigger value="self-built">{t('Self-Built Sharing')}</TabsTrigger>
+        </TabsList>
 
-      {/* Enable Switch */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <span className="text-sm font-medium">{t('Start Hapi Service')}</span>
-          <p className="text-xs text-muted-foreground">
-            {t('Start Hapi server for remote access')}
-            {status.running && status.port && ` (Port: ${status.port})`}
-            {status.running && !status.ready && ` - ${t('Starting...')}`}
-          </p>
-        </div>
-        <Switch
-          checked={hapiSettings.enabled}
-          onCheckedChange={handleEnabledChange}
-          disabled={loading}
-        />
-      </div>
-
-      {/* Status indicator */}
-      {status.error && (
-        <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-          {status.error}
-        </div>
-      )}
-
-      {/* Only show controls and configuration when enabled */}
-      {hapiSettings.enabled && (
-        <>
-          {/* Control buttons when running */}
-          {status.running && (
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={handleStop} disabled={loading}>
-                <Square className="mr-1.5 h-3.5 w-3.5" />
-                {t('Stop')}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleRestart} disabled={loading}>
-                <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
-                {t('Restart')}
-              </Button>
+        {/* Hapi Tab */}
+        <TabsContent value="hapi" className="mt-4">
+          <div className="space-y-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-medium">Hapi</h3>
+                <button
+                  type="button"
+                  onClick={() =>
+                    window.electronAPI.shell.openExternal('https://github.com/tiann/hapi')
+                  }
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  title="GitHub"
+                >
+                  <Github className="h-4 w-4" />
+                </button>
+                {hapiGlobal.installed ? (
+                  <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400">
+                    v{hapiGlobal.version || '?'}
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    npx
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t('Share agent sessions remotely via Web and Telegram')}
+              </p>
             </div>
-          )}
 
-          {/* Runner Section */}
-          <div className="space-y-4 border-t pt-4">
+            {/* Enable Switch */}
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <span className="text-sm font-medium">{t('Enable Remote Spawn (Runner)')}</span>
+                <span className="text-sm font-medium">{t('Start Hapi Service')}</span>
                 <p className="text-xs text-muted-foreground">
-                  {t(
-                    'Automatically start Hapi Runner with Hapi service for remote session spawning'
-                  )}{' '}
-                  {t('(Changes apply after service restart)')}
+                  {t('Start Hapi server for remote access')}
+                  {status.running && status.port && ` (Port: ${status.port})`}
+                  {status.running && !status.ready && ` - ${t('Starting...')}`}
                 </p>
               </div>
               <Switch
-                checked={hapiSettings.runnerEnabled}
-                onCheckedChange={handleRunnerEnabledChange}
+                checked={hapiSettings.enabled}
+                onCheckedChange={handleEnabledChange}
                 disabled={loading}
               />
             </div>
-          </div>
 
-          {/* Cloudflared Section */}
-          <div className="space-y-4 border-t pt-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <span className="text-sm font-medium">{t('Public Access (Cloudflared)')}</span>
-                <p className="text-xs text-muted-foreground">
-                  {t('Expose local server to the internet via Cloudflare Tunnel')}
-                </p>
-              </div>
-              <Switch
-                checked={hapiSettings.cfEnabled}
-                onCheckedChange={handleCfEnabledChange}
-                disabled={cfLoading || !cfStatus.installed || !status.ready}
-              />
-            </div>
-
-            {/* Version and Install */}
-            <div className="flex items-center gap-3">
-              {cfStatus.installed ? (
-                <span className="text-xs text-muted-foreground">
-                  cloudflared {cfStatus.version}
-                </span>
-              ) : (
-                <span className="text-xs text-muted-foreground">{t('Not installed')}</span>
-              )}
-              {!cfStatus.installed && (
-                <Button variant="outline" size="sm" onClick={handleCfInstall} disabled={cfLoading}>
-                  <Download className="mr-1.5 h-3.5 w-3.5" />
-                  {cfLoading ? t('Installing...') : t('Install')}
-                </Button>
-              )}
-            </div>
-
-            {/* Cloudflared Error */}
-            {cfStatus.error && (
+            {/* Status indicator */}
+            {status.error && (
               <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-                {cfStatus.error}
+                {status.error}
               </div>
             )}
 
-            {/* Tunnel URL when running */}
-            {cfStatus.running && cfStatus.url && (
-              <div className="flex items-center gap-2 rounded-md bg-accent/50 p-3">
-                <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <code className="flex-1 truncate text-xs">{cfStatus.url}</code>
-                <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={handleCopyUrl}>
-                  {copied ? (
-                    <Check className="h-3.5 w-3.5 text-green-500" />
-                  ) : (
-                    <Copy className="h-3.5 w-3.5" />
-                  )}
-                </Button>
-              </div>
-            )}
+            {/* Only show controls and configuration when enabled */}
+            {hapiSettings.enabled && (
+              <>
+                {/* Control buttons when running */}
+                {status.running && (
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={handleStop} disabled={loading}>
+                      <Square className="mr-1.5 h-3.5 w-3.5" />
+                      {t('Stop')}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={handleRestart} disabled={loading}>
+                      <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
+                      {t('Restart')}
+                    </Button>
+                  </div>
+                )}
 
-            {/* Tunnel Mode Tabs */}
-            {cfStatus.installed && (
-              <Tabs
-                value={hapiSettings.tunnelMode}
-                onValueChange={(v) => setHapiSettings({ tunnelMode: v as 'quick' | 'auth' })}
-              >
-                <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="quick" disabled={cfStatus.running}>
-                    {t('Quick Tunnel')}
-                  </TabsTrigger>
-                  <TabsTrigger value="auth" disabled={cfStatus.running}>
-                    {t('Auth Tunnel')}
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="quick" className="mt-3">
-                  <p className="text-xs text-muted-foreground">
-                    {t(
-                      'Create a temporary tunnel with auto-generated URL. No authentication required.'
-                    )}
-                  </p>
-                </TabsContent>
-                <TabsContent value="auth" className="mt-3 space-y-3">
-                  <p className="text-xs text-muted-foreground">
-                    {t('Use a pre-configured tunnel with your Cloudflare account.')}
-                  </p>
-                  <div className="grid grid-cols-[100px_1fr] items-center gap-4">
-                    <span className="text-sm font-medium">{t('Tunnel Token')}</span>
-                    <Input
-                      type="password"
-                      value={hapiSettings.tunnelToken}
-                      onChange={(e) => setHapiSettings({ tunnelToken: e.target.value })}
-                      placeholder="eyJhIjoiNj..."
-                      className="font-mono text-xs"
-                      disabled={cfStatus.running}
+                {/* Runner Section */}
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <span className="text-sm font-medium">
+                        {t('Enable Remote Spawn (Runner)')}
+                      </span>
+                      <p className="text-xs text-muted-foreground">
+                        {t(
+                          'Automatically start Hapi Runner with Hapi service for remote session spawning'
+                        )}{' '}
+                        {t('(Changes apply after service restart)')}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={hapiSettings.runnerEnabled}
+                      onCheckedChange={handleRunnerEnabledChange}
+                      disabled={loading}
                     />
                   </div>
-                </TabsContent>
-              </Tabs>
+                </div>
+
+                {/* Cloudflared Section */}
+                <div className="space-y-4 border-t pt-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <span className="text-sm font-medium">
+                        {t('Public Access (Cloudflared)')}
+                      </span>
+                      <p className="text-xs text-muted-foreground">
+                        {t('Expose local server to the internet via Cloudflare Tunnel')}
+                      </p>
+                    </div>
+                    <Switch
+                      checked={hapiSettings.cfEnabled}
+                      onCheckedChange={handleCfEnabledChange}
+                      disabled={cfLoading || !cfStatus.installed || !status.ready}
+                    />
+                  </div>
+
+                  {/* Version and Install */}
+                  <div className="flex items-center gap-3">
+                    {cfStatus.installed ? (
+                      <span className="text-xs text-muted-foreground">
+                        cloudflared {cfStatus.version}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">{t('Not installed')}</span>
+                    )}
+                    {!cfStatus.installed && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={handleCfInstall}
+                        disabled={cfLoading}
+                      >
+                        <Download className="mr-1.5 h-3.5 w-3.5" />
+                        {cfLoading ? t('Installing...') : t('Install')}
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Cloudflared Error */}
+                  {cfStatus.error && (
+                    <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
+                      {cfStatus.error}
+                    </div>
+                  )}
+
+                  {/* Tunnel URL when running */}
+                  {cfStatus.running && cfStatus.url && (
+                    <div className="flex items-center gap-2 rounded-md bg-accent/50 p-3">
+                      <ExternalLink className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      <code className="flex-1 truncate text-xs">{cfStatus.url}</code>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-7 w-7 p-0"
+                        onClick={handleCopyUrl}
+                      >
+                        {copied ? (
+                          <Check className="h-3.5 w-3.5 text-green-500" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Tunnel Mode Tabs */}
+                  {cfStatus.installed && (
+                    <Tabs
+                      value={hapiSettings.tunnelMode}
+                      onValueChange={(v) => setHapiSettings({ tunnelMode: v as 'quick' | 'auth' })}
+                    >
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="quick" disabled={cfStatus.running}>
+                          {t('Quick Tunnel')}
+                        </TabsTrigger>
+                        <TabsTrigger value="auth" disabled={cfStatus.running}>
+                          {t('Auth Tunnel')}
+                        </TabsTrigger>
+                      </TabsList>
+                      <TabsContent value="quick" className="mt-3">
+                        <p className="text-xs text-muted-foreground">
+                          {t(
+                            'Create a temporary tunnel with auto-generated URL. No authentication required.'
+                          )}
+                        </p>
+                      </TabsContent>
+                      <TabsContent value="auth" className="mt-3 space-y-3">
+                        <p className="text-xs text-muted-foreground">
+                          {t('Use a pre-configured tunnel with your Cloudflare account.')}
+                        </p>
+                        <div className="grid grid-cols-[100px_1fr] items-center gap-4">
+                          <span className="text-sm font-medium">{t('Tunnel Token')}</span>
+                          <Input
+                            type="password"
+                            value={hapiSettings.tunnelToken}
+                            onChange={(e) => setHapiSettings({ tunnelToken: e.target.value })}
+                            placeholder="eyJhIjoiNj..."
+                            className="font-mono text-xs"
+                            disabled={cfStatus.running}
+                          />
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+                  )}
+
+                  {/* HTTP2 Protocol Switch */}
+                  {cfStatus.installed && (
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <span className="text-sm font-medium">{t('Use HTTP/2 Protocol')}</span>
+                        <p className="text-xs text-muted-foreground">
+                          {t('More compatible than QUIC when behind firewalls')}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={hapiSettings.useHttp2}
+                        onCheckedChange={(checked) => setHapiSettings({ useHttp2: checked })}
+                        disabled={cfStatus.running}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Configuration */}
+                <div className="space-y-4 border-t pt-4">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    {t('Configuration')}
+                  </h4>
+
+                  {/* Server Port */}
+                  <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                    <span className="text-sm font-medium">{t('Server Port')}</span>
+                    <div className="space-y-1.5">
+                      <Input
+                        type="number"
+                        value={localPort}
+                        onChange={(e) => setLocalPort(e.target.value)}
+                        onBlur={() => setHapiSettings({ webappPort: Number(localPort) || 3006 })}
+                        min={1024}
+                        max={65535}
+                        className="w-32"
+                      />
+                      <p className="text-xs text-muted-foreground">{t('Server listening port')}</p>
+                    </div>
+                  </div>
+
+                  {/* Access Token */}
+                  <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                    <span className="text-sm font-medium">{t('Access Token')}</span>
+                    <div className="space-y-1.5">
+                      <div className="flex gap-2">
+                        <Input
+                          type="text"
+                          value={localToken}
+                          onChange={(e) => setLocalToken(e.target.value)}
+                          onBlur={() => setHapiSettings({ cliApiToken: localToken })}
+                          placeholder={t('Auto-generated if empty')}
+                          className="flex-1 font-mono text-xs"
+                        />
+                        <Button variant="outline" size="sm" onClick={handleGenerateToken}>
+                          {t('Generate')}
+                        </Button>
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        {t('Access token for CLI and web UI')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Telegram Bot Token */}
+                  <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                    <span className="text-sm font-medium">{t('Telegram Bot Token')}</span>
+                    <div className="space-y-1.5">
+                      <Input
+                        type="password"
+                        value={localTelegramToken}
+                        onChange={(e) => setLocalTelegramToken(e.target.value)}
+                        onBlur={() => setHapiSettings({ telegramBotToken: localTelegramToken })}
+                        placeholder={t('Optional')}
+                        className="font-mono text-xs"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t('Telegram bot token (optional)')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Public URL */}
+                  <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                    <span className="text-sm font-medium">{t('Public URL')}</span>
+                    <div className="space-y-1.5">
+                      <Input
+                        type="url"
+                        value={localWebappUrl}
+                        onChange={(e) => setLocalWebappUrl(e.target.value)}
+                        onBlur={() => setHapiSettings({ webappUrl: localWebappUrl })}
+                        placeholder="https://example.com"
+                        className="font-mono text-xs"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t('Public URL for Telegram Mini App')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Allowed Chat IDs */}
+                  <div className="grid grid-cols-[140px_1fr] items-center gap-4">
+                    <span className="text-sm font-medium">{t('Allowed Chat IDs')}</span>
+                    <div className="space-y-1.5">
+                      <Input
+                        type="text"
+                        value={localAllowedChatIds}
+                        onChange={(e) => setLocalAllowedChatIds(e.target.value)}
+                        onBlur={() => setHapiSettings({ allowedChatIds: localAllowedChatIds })}
+                        placeholder="123456789,987654321"
+                        className="font-mono text-xs"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        {t('Comma-separated Telegram chat IDs')}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </>
             )}
 
-            {/* HTTP2 Protocol Switch */}
-            {cfStatus.installed && (
-              <div className="flex items-center justify-between">
+            {/* Happy Section */}
+            <div className="border-t pt-4">
+              <div className="flex items-center gap-2">
+                <h3 className="text-lg font-medium">Happy</h3>
+                <button
+                  type="button"
+                  onClick={() =>
+                    window.electronAPI.shell.openExternal('https://github.com/slopus/happy')
+                  }
+                  className="text-muted-foreground hover:text-foreground transition-colors"
+                  title="GitHub"
+                >
+                  <Github className="h-4 w-4" />
+                </button>
+                {happyGlobal === null ? (
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
+                ) : happyGlobal.installed ? (
+                  <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400">
+                    v{happyGlobal.version || '?'}
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                    {t('Not installed')}
+                  </span>
+                )}
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {t('Run agents through Happy for enhanced experience')}
+              </p>
+
+              {/* Happy Enable Switch */}
+              <div className="mt-4 flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <span className="text-sm font-medium">{t('Use HTTP/2 Protocol')}</span>
+                  <span className="text-sm font-medium">{t('Enable Happy Agent')}</span>
                   <p className="text-xs text-muted-foreground">
-                    {t('More compatible than QUIC when behind firewalls')}
+                    {happyGlobal?.installed
+                      ? t('Use Happy to run supported agents')
+                      : t('Install Happy globally to enable this feature')}
                   </p>
                 </div>
                 <Switch
-                  checked={hapiSettings.useHttp2}
-                  onCheckedChange={(checked) => setHapiSettings({ useHttp2: checked })}
-                  disabled={cfStatus.running}
+                  checked={hapiSettings.happyEnabled}
+                  onCheckedChange={(checked) => setHapiSettings({ happyEnabled: checked })}
+                  disabled={happyGlobal === null || !happyGlobal.installed}
                 />
-              </div>
-            )}
-          </div>
-
-          {/* Configuration */}
-          <div className="space-y-4 border-t pt-4">
-            <h4 className="text-sm font-medium text-muted-foreground">{t('Configuration')}</h4>
-
-            {/* Server Port */}
-            <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-              <span className="text-sm font-medium">{t('Server Port')}</span>
-              <div className="space-y-1.5">
-                <Input
-                  type="number"
-                  value={localPort}
-                  onChange={(e) => setLocalPort(e.target.value)}
-                  onBlur={() => setHapiSettings({ webappPort: Number(localPort) || 3006 })}
-                  min={1024}
-                  max={65535}
-                  className="w-32"
-                />
-                <p className="text-xs text-muted-foreground">{t('Server listening port')}</p>
-              </div>
-            </div>
-
-            {/* Access Token */}
-            <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-              <span className="text-sm font-medium">{t('Access Token')}</span>
-              <div className="space-y-1.5">
-                <div className="flex gap-2">
-                  <Input
-                    type="text"
-                    value={localToken}
-                    onChange={(e) => setLocalToken(e.target.value)}
-                    onBlur={() => setHapiSettings({ cliApiToken: localToken })}
-                    placeholder={t('Auto-generated if empty')}
-                    className="flex-1 font-mono text-xs"
-                  />
-                  <Button variant="outline" size="sm" onClick={handleGenerateToken}>
-                    {t('Generate')}
-                  </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {t('Access token for CLI and web UI')}
-                </p>
-              </div>
-            </div>
-
-            {/* Telegram Bot Token */}
-            <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-              <span className="text-sm font-medium">{t('Telegram Bot Token')}</span>
-              <div className="space-y-1.5">
-                <Input
-                  type="password"
-                  value={localTelegramToken}
-                  onChange={(e) => setLocalTelegramToken(e.target.value)}
-                  onBlur={() => setHapiSettings({ telegramBotToken: localTelegramToken })}
-                  placeholder={t('Optional')}
-                  className="font-mono text-xs"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('Telegram bot token (optional)')}
-                </p>
-              </div>
-            </div>
-
-            {/* Public URL */}
-            <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-              <span className="text-sm font-medium">{t('Public URL')}</span>
-              <div className="space-y-1.5">
-                <Input
-                  type="url"
-                  value={localWebappUrl}
-                  onChange={(e) => setLocalWebappUrl(e.target.value)}
-                  onBlur={() => setHapiSettings({ webappUrl: localWebappUrl })}
-                  placeholder="https://example.com"
-                  className="font-mono text-xs"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('Public URL for Telegram Mini App')}
-                </p>
-              </div>
-            </div>
-
-            {/* Allowed Chat IDs */}
-            <div className="grid grid-cols-[140px_1fr] items-center gap-4">
-              <span className="text-sm font-medium">{t('Allowed Chat IDs')}</span>
-              <div className="space-y-1.5">
-                <Input
-                  type="text"
-                  value={localAllowedChatIds}
-                  onChange={(e) => setLocalAllowedChatIds(e.target.value)}
-                  onBlur={() => setHapiSettings({ allowedChatIds: localAllowedChatIds })}
-                  placeholder="123456789,987654321"
-                  className="font-mono text-xs"
-                />
-                <p className="text-xs text-muted-foreground">
-                  {t('Comma-separated Telegram chat IDs')}
-                </p>
               </div>
             </div>
           </div>
-        </>
-      )}
+        </TabsContent>
 
-      {/* Happy Section */}
-      <div className="border-t pt-4">
-        <div className="flex items-center gap-2">
-          <h3 className="text-lg font-medium">Happy</h3>
-          <button
-            type="button"
-            onClick={() => window.electronAPI.shell.openExternal('https://github.com/slopus/happy')}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            title="GitHub"
-          >
-            <Github className="h-4 w-4" />
-          </button>
-          {happyGlobal === null ? (
-            <div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/30 border-t-muted-foreground" />
-          ) : happyGlobal.installed ? (
-            <span className="rounded-full bg-green-500/10 px-2 py-0.5 text-xs text-green-600 dark:text-green-400">
-              v{happyGlobal.version || '?'}
-            </span>
-          ) : (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-              {t('Not installed')}
-            </span>
-          )}
-        </div>
-        <p className="text-sm text-muted-foreground">
-          {t('Run agents through Happy for enhanced experience')}
-        </p>
-
-        {/* Happy Enable Switch */}
-        <div className="mt-4 flex items-center justify-between">
-          <div className="space-y-0.5">
-            <span className="text-sm font-medium">{t('Enable Happy Agent')}</span>
-            <p className="text-xs text-muted-foreground">
-              {happyGlobal?.installed
-                ? t('Use Happy to run supported agents')
-                : t('Install Happy globally to enable this feature')}
-            </p>
-          </div>
-          <Switch
-            checked={hapiSettings.happyEnabled}
-            onCheckedChange={(checked) => setHapiSettings({ happyEnabled: checked })}
-            disabled={happyGlobal === null || !happyGlobal.installed}
-          />
-        </div>
-      </div>
+        {/* Self-Built Sharing Tab */}
+        <TabsContent value="self-built" className="mt-4">
+          <SelfBuiltSharingTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

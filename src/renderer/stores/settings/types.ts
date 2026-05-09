@@ -247,6 +247,15 @@ export interface PromptValidationResult {
 // Hapi remote sharing settings
 export type TunnelMode = 'quick' | 'auth';
 
+// Remote Share (Self-Built) settings
+export interface RemoteShareSettings {
+  enabled: boolean;
+  port: number;
+  authToken: string;
+  boreEnabled: boolean;
+  boreServer: string;
+}
+
 export interface HapiSettings {
   enabled: boolean;
   webappPort: number;
@@ -346,6 +355,7 @@ export interface SettingsState {
   // App Settings
   autoUpdateEnabled: boolean;
   hapiSettings: HapiSettings;
+  remoteShareSettings: RemoteShareSettings;
   defaultWorktreePath: string; // Default path for creating worktrees
   proxySettings: ProxySettings;
   autoCreateSessionOnActivate: boolean; // Auto-create agent/terminal session when worktree becomes active
@@ -479,6 +489,7 @@ export interface SettingsState {
   // Setters - App
   setAutoUpdateEnabled: (enabled: boolean) => void;
   setHapiSettings: (settings: Partial<HapiSettings>) => void;
+  setRemoteShareSettings: (settings: Partial<RemoteShareSettings>) => void;
   setDefaultWorktreePath: (path: string) => void;
   setProxySettings: (settings: Partial<ProxySettings>) => void;
   setAutoCreateSessionOnActivate: (enabled: boolean) => void;

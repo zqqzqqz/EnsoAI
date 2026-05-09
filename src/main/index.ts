@@ -33,6 +33,7 @@ if (process.platform === 'darwin') {
 
 import {
   autoStartHapi,
+  autoStartRemoteShare,
   cleanupAllResources,
   cleanupAllResourcesSync,
   registerIpcHandlers,
@@ -623,6 +624,9 @@ app.whenReady().then(async () => {
 
   // Auto-start Hapi server if enabled in settings
   await autoStartHapi();
+
+  // Auto-start Remote Share server if enabled in settings
+  await autoStartRemoteShare();
 
   setCurrentLocale(readStoredLanguage());
 

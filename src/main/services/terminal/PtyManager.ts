@@ -206,10 +206,10 @@ interface PtySession {
   ownerId: number | null;
   onData: (data: string) => void;
   onExit?: (exitCode: number, signal?: number) => void;
-  // node-pty returns disposables for event subscriptions; keep them so we can
-  // dispose during shutdown and avoid native threads hanging during Node cleanup.
   dataDisposable: { dispose(): void };
   exitDisposable?: { dispose(): void };
+  // Remote observers for sharing terminal data without owning the session
+  observers: Set<(data: string) => void>;
 }
 
 function findFallbackShell(): string {
@@ -456,12 +456,30 @@ export class PtyManager {
       }
     }
 
+    const observers = new Set<(data: string) => void>();
+
     const dataDisposable = ptyProcess.onData((data) => {
       onData(data);
+      // Fan out to remote observers
+      for (const observer of observers) {
+        try {
+          observer(data);
+        } catch {
+          // Ignore observer errors
+        }
+      }
     });
 
     // Store session first so onExit callback can access it
-    const session: PtySession = { pty: ptyProcess, cwd, ownerId, onData, onExit, dataDisposable };
+    const session: PtySession = {
+      pty: ptyProcess,
+      cwd,
+      ownerId,
+      onData,
+      onExit,
+      dataDisposable,
+      observers,
+    };
     this.sessions.set(id, session);
 
     const exitDisposable = ptyProcess.onExit(({ exitCode, signal }) => {
@@ -621,6 +639,29 @@ export class PtyManager {
     for (const id of ids) {
       this.destroy(id);
     }
+  }
+
+  /**
+   * List all active PTY sessions with metadata.
+   */
+  listSessions(): Array<{ id: string; cwd: string }> {
+    return Array.from(this.sessions.entries()).map(([id, session]) => ({
+      id,
+      cwd: session.cwd,
+    }));
+  }
+
+  /**
+   * Subscribe to an existing session's data stream as a remote observer.
+   * Returns an unsubscribe function, or null if the session doesn't exist.
+   */
+  subscribeToSession(id: string, onData: (data: string) => void): (() => void) | null {
+    const session = this.sessions.get(id);
+    if (!session) return null;
+    session.observers.add(onData);
+    return () => {
+      session.observers.delete(onData);
+    };
   }
 
   /**

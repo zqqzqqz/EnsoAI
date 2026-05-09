@@ -258,6 +258,20 @@ export const IPC_CHANNELS = {
   CLOUDFLARED_GET_STATUS: 'cloudflared:getStatus',
   CLOUDFLARED_STATUS_CHANGED: 'cloudflared:statusChanged',
 
+  // Remote Share (Self-Built)
+  REMOTE_SHARE_START: 'remoteShare:start',
+  REMOTE_SHARE_STOP: 'remoteShare:stop',
+  REMOTE_SHARE_GET_STATUS: 'remoteShare:getStatus',
+  REMOTE_SHARE_STATUS_CHANGED: 'remoteShare:statusChanged',
+
+  // Bore Tunnel
+  BORE_CHECK: 'bore:check',
+  BORE_INSTALL: 'bore:install',
+  BORE_START: 'bore:start',
+  BORE_STOP: 'bore:stop',
+  BORE_GET_STATUS: 'bore:getStatus',
+  BORE_STATUS_CHANGED: 'bore:statusChanged',
+
   // Todo
   TODO_GET_TASKS: 'todo:getTasks',
   TODO_ADD_TASK: 'todo:addTask',

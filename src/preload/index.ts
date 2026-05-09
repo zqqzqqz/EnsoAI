@@ -1022,6 +1022,93 @@ const electronAPI = {
     },
   },
 
+  // Remote Share (Self-Built)
+  remoteShare: {
+    start: (config: {
+      port: number;
+      authToken: string;
+    }): Promise<{
+      running: boolean;
+      port?: number;
+      url?: string;
+      error?: string;
+      generatedToken?: string;
+    }> => ipcRenderer.invoke(IPC_CHANNELS.REMOTE_SHARE_START, config),
+    stop: (): Promise<{
+      running: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke(IPC_CHANNELS.REMOTE_SHARE_STOP),
+    getStatus: (): Promise<{
+      running: boolean;
+      port?: number;
+      url?: string;
+      error?: string;
+    }> => ipcRenderer.invoke(IPC_CHANNELS.REMOTE_SHARE_GET_STATUS),
+    onStatusChanged: (
+      callback: (status: { running: boolean; port?: number; url?: string; error?: string }) => void
+    ): (() => void) => {
+      const handler = (
+        _: unknown,
+        status: { running: boolean; port?: number; url?: string; error?: string }
+      ) => callback(status);
+      ipcRenderer.on(IPC_CHANNELS.REMOTE_SHARE_STATUS_CHANGED, handler);
+      return () => ipcRenderer.off(IPC_CHANNELS.REMOTE_SHARE_STATUS_CHANGED, handler);
+    },
+  },
+
+  // Bore Tunnel
+  bore: {
+    check: (): Promise<{ installed: boolean; version?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.BORE_CHECK),
+    install: (): Promise<{ installed: boolean; version?: string; error?: string }> =>
+      ipcRenderer.invoke(IPC_CHANNELS.BORE_INSTALL),
+    start: (config: {
+      port: number;
+      server: string;
+    }): Promise<{
+      installed: boolean;
+      version?: string;
+      running: boolean;
+      url?: string;
+      error?: string;
+    }> => ipcRenderer.invoke(IPC_CHANNELS.BORE_START, config),
+    stop: (): Promise<{
+      installed: boolean;
+      version?: string;
+      running: boolean;
+      error?: string;
+    }> => ipcRenderer.invoke(IPC_CHANNELS.BORE_STOP),
+    getStatus: (): Promise<{
+      installed: boolean;
+      version?: string;
+      running: boolean;
+      url?: string;
+      error?: string;
+    }> => ipcRenderer.invoke(IPC_CHANNELS.BORE_GET_STATUS),
+    onStatusChanged: (
+      callback: (status: {
+        installed: boolean;
+        version?: string;
+        running: boolean;
+        url?: string;
+        error?: string;
+      }) => void
+    ): (() => void) => {
+      const handler = (
+        _: unknown,
+        status: {
+          installed: boolean;
+          version?: string;
+          running: boolean;
+          url?: string;
+          error?: string;
+        }
+      ) => callback(status);
+      ipcRenderer.on(IPC_CHANNELS.BORE_STATUS_CHANGED, handler);
+      return () => ipcRenderer.off(IPC_CHANNELS.BORE_STATUS_CHANGED, handler);
+    },
+  },
+
   // Web Inspector
   webInspector: {
     start: (): Promise<{ success: boolean; error?: string }> =>
