@@ -183,6 +183,33 @@ body {
 .settings-label { font-size: 13px; color: var(--text-muted); margin-bottom: 4px; }
 .settings-value { font-size: 14px; font-family: monospace; word-break: break-all; }
 
+/* Folder Picker */
+.fp { display: none; flex-direction: column; height: 100%; position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 20; background: var(--bg); }
+.fp.active { display: flex; }
+.fp-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.fp-header h3 { font-size: 15px; font-weight: 600; }
+.fp-path { display: flex; align-items: center; gap: 4px; padding: 8px 16px; background: var(--bg-card); border-bottom: 1px solid var(--border); font-size: 12px; color: var(--text-muted); overflow-x: auto; white-space: nowrap; flex-shrink: 0; }
+.fp-path span { cursor: pointer; }
+.fp-path span:hover { color: var(--accent); }
+.fp-roots { display: flex; gap: 6px; padding: 8px 16px; overflow-x: auto; flex-shrink: 0; border-bottom: 1px solid var(--border); }
+.fp-root-chip { padding: 6px 14px; background: var(--bg-input); border: 1px solid var(--border); border-radius: 20px; color: var(--text); font-size: 13px; cursor: pointer; white-space: nowrap; transition: all 0.15s; }
+.fp-root-chip:hover { border-color: var(--accent); color: var(--accent); }
+.fp-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.fp-item { display: flex; align-items: center; gap: 10px; padding: 13px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; min-height: 48px; }
+.fp-item:hover { background: var(--bg-hover); }
+.fp-item:active { background: rgba(99,102,241,0.12); }
+.fp-item-icon { font-size: 18px; flex-shrink: 0; width: 24px; text-align: center; }
+.fp-item-name { flex: 1; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fp-item-badge { font-size: 10px; padding: 2px 6px; border-radius: 8px; background: rgba(34,197,94,0.15); color: var(--success); flex-shrink: 0; }
+.fp-item-arrow { color: var(--text-dim); font-size: 14px; flex-shrink: 0; }
+.fp-footer { display: flex; gap: 8px; padding: 10px 16px; background: var(--bg-card); border-top: 1px solid var(--border); flex-shrink: 0; }
+.fp-footer .btn-select { flex: 1; padding: 12px; background: var(--accent); color: white; border: none; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; }
+.fp-footer .btn-select:hover { background: var(--accent-hover); }
+.fp-footer .btn-select:disabled { opacity: 0.4; cursor: not-allowed; }
+.fp-footer .btn-manual { padding: 12px 16px; background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: var(--radius-sm); font-size: 13px; cursor: pointer; white-space: nowrap; }
+.fp-footer .btn-manual:hover { border-color: var(--accent); color: var(--accent); }
+.fp-loading { text-align: center; padding: 30px; color: var(--text-dim); font-size: 14px; }
+
 /* Responsive */
 @media (min-width: 768px) {
   .login-card { padding: 48px 40px; }
@@ -219,12 +246,6 @@ body {
       <div class="section-header">
         <h3>项目管理</h3>
         <button class="btn-sm" onclick="showAddProject()">+ 导入</button>
-      </div>
-      <div id="addProjectArea" style="display:none">
-        <div class="input-row">
-          <input type="text" id="projectPathInput" placeholder="输入项目绝对路径">
-          <button onclick="addProject()">导入</button>
-        </div>
       </div>
       <div id="projectList" class="card-list">
         <div class="empty-state">
@@ -316,6 +337,30 @@ body {
       </div>
       <div class="diff-content" id="diffViewerContent"></div>
     </div>
+
+    <!-- Folder Picker Overlay -->
+    <div id="folderPicker" class="fp">
+      <div class="fp-header">
+        <button class="btn-icon" onclick="closeFolderPicker()">✕</button>
+        <h3>选择项目文件夹</h3>
+        <span></span>
+      </div>
+      <div class="fp-path" id="fpPath"></div>
+      <div class="fp-roots" id="fpRoots"></div>
+      <div class="fp-list" id="fpList">
+        <div class="fp-loading">加载中...</div>
+      </div>
+      <div class="fp-footer">
+        <button class="btn-manual" onclick="toggleManualInput()">手动输入</button>
+        <button class="btn-select" id="fpSelectBtn" onclick="confirmSelectFolder()" disabled>选择此目录</button>
+      </div>
+      <div id="fpManualArea" style="display:none;padding:0 16px 10px;background:var(--bg-card);border-top:1px solid var(--border)">
+        <div class="input-row" style="padding:10px 0 0">
+          <input type="text" id="fpManualInput" placeholder="输入文件夹绝对路径">
+          <button onclick="manualAddProject()">导入</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Bottom Tab Bar -->
@@ -358,6 +403,10 @@ body {
   let gitChanges = null;
   let gitLogEntries = [];
 
+  // Folder picker state
+  let fpCurrentPath = '';
+  let fpDirRoots = [];
+
   // --- Connection ---
 
   window.doConnect = function() {
@@ -374,7 +423,7 @@ body {
     try { ws = new WebSocket(url); } catch(e) { showError('无法建立连接'); resetBtn(); return; }
 
     ws.onopen = function() {
-      sessionStorage.setItem('rs-token', token);
+      localStorage.setItem('rs-token', token);
       showMainApp();
       startPing();
       document.getElementById('settingsUrl').textContent = location.origin;
@@ -455,6 +504,14 @@ body {
       case 'command:started':
         send({ type: 'session:list' });
         break;
+      case 'dir:roots':
+        fpDirRoots = msg.roots || [];
+        renderFpRoots();
+        break;
+      case 'dir:browse':
+        renderFpList(msg.path, msg.dirs, msg.parent);
+        break;
+      case 'dir:error': alert(msg.error); break;
       case 'error': alert(msg.message); break;
     }
   }
@@ -481,17 +538,10 @@ body {
   }
 
   window.showAddProject = function() {
-    var area = document.getElementById('addProjectArea');
-    area.style.display = area.style.display === 'none' ? 'block' : 'none';
-    if (area.style.display !== 'none') document.getElementById('projectPathInput').focus();
-  };
-
-  window.addProject = function() {
-    var p = document.getElementById('projectPathInput').value.trim();
-    if (!p) return;
-    send({ type: 'project:add', path: p });
-    document.getElementById('projectPathInput').value = '';
-    document.getElementById('addProjectArea').style.display = 'none';
+    document.getElementById('folderPicker').classList.add('active');
+    document.getElementById('fpSelectBtn').disabled = true;
+    fpCurrentPath = '';
+    send({ type: 'dir:roots' });
   };
 
   window.selectProject = function(index) {
@@ -827,6 +877,92 @@ body {
 
   window.closeOverlay = function(id) { document.getElementById(id).classList.remove('active'); };
 
+  // --- Folder Picker ---
+
+  window.closeFolderPicker = function() {
+    document.getElementById('folderPicker').classList.remove('active');
+    document.getElementById('fpManualArea').style.display = 'none';
+  };
+
+  function renderFpRoots() {
+    var c = document.getElementById('fpRoots');
+    c.innerHTML = fpDirRoots.map(function(r) {
+      return '<div class="fp-root-chip" onclick="fpNavTo(\'' + escAttr(r.path) + '\')">' + esc(r.name) + '</div>';
+    }).join('');
+    // Auto-navigate to first root (home directory)
+    if (fpDirRoots.length && !fpCurrentPath) {
+      fpNavTo(fpDirRoots[0].path);
+    }
+  }
+
+  function renderFpList(dirPath, dirs, parent) {
+    fpCurrentPath = dirPath;
+    var btn = document.getElementById('fpSelectBtn');
+    btn.disabled = false;
+    btn.textContent = '选择: ' + dirPath.split(/[\/\\]/).filter(Boolean).pop() || dirPath;
+
+    // Breadcrumb
+    var parts = dirPath.replace(/\\/g, '/').split('/').filter(Boolean);
+    var bcHtml = '';
+    if (parent) bcHtml += '<span onclick="fpNavTo(\'' + escAttr(parent) + '\')">..</span>';
+    if (parts.length > 3) {
+      bcHtml += '<span style="color:var(--text-dim)">…</span>';
+      var last3 = parts.slice(-3);
+      var acc = dirPath.replace(/\\/g, '/');
+      for (var k = 0; k < parts.length - 3; k++) acc = acc.replace('/' + parts[k], '');
+      last3.forEach(function(p) {
+        bcHtml += '<span class="path-sep">/</span><span>' + esc(p) + '</span>';
+      });
+    } else {
+      parts.forEach(function(p, i) {
+        if (i > 0) bcHtml += '<span class="path-sep">/</span>';
+        bcHtml += '<span>' + esc(p) + '</span>';
+      });
+    }
+    document.getElementById('fpPath').innerHTML = bcHtml;
+
+    // Dir list
+    var c = document.getElementById('fpList');
+    if (!dirs || !dirs.length) {
+      c.innerHTML = '<div class="empty-state" style="padding:30px"><div class="icon">📂</div><p>此目录无子文件夹</p></div>';
+      return;
+    }
+    c.innerHTML = dirs.map(function(d) {
+      var gitBadge = d.hasGit ? '<span class="fp-item-badge">Git</span>' : '';
+      var arrow = d.hasSubdirs ? '<span class="fp-item-arrow">›</span>' : '';
+      return '<div class="fp-item" onclick="fpNavTo(\'' + escAttr(d.path) + '\')">' +
+        '<span class="fp-item-icon">📂</span>' +
+        '<span class="fp-item-name">' + esc(d.name) + '</span>' +
+        gitBadge + arrow +
+      '</div>';
+    }).join('');
+  }
+
+  window.fpNavTo = function(p) {
+    document.getElementById('fpList').innerHTML = '<div class="fp-loading">加载中...</div>';
+    send({ type: 'dir:browse', path: p });
+  };
+
+  window.confirmSelectFolder = function() {
+    if (!fpCurrentPath) return;
+    send({ type: 'project:add', path: fpCurrentPath });
+    window.closeFolderPicker();
+  };
+
+  window.toggleManualInput = function() {
+    var area = document.getElementById('fpManualArea');
+    area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    if (area.style.display !== 'none') document.getElementById('fpManualInput').focus();
+  };
+
+  window.manualAddProject = function() {
+    var p = document.getElementById('fpManualInput').value.trim();
+    if (!p) return;
+    send({ type: 'project:add', path: p });
+    document.getElementById('fpManualInput').value = '';
+    window.closeFolderPicker();
+  };
+
   // --- Utilities ---
 
   function shortCwd(cwd) { var p = cwd.split(/[\/\\]/).filter(Boolean); return p.slice(-2).join('/') || cwd; }
@@ -847,12 +983,16 @@ body {
 
   // --- Init ---
   window.addEventListener('load', function() {
-    var saved = sessionStorage.getItem('rs-token');
-    if (saved) document.getElementById('tokenInput').value = saved;
-    document.getElementById('tokenInput').focus();
+    var saved = localStorage.getItem('rs-token');
+    if (saved) {
+      document.getElementById('tokenInput').value = saved;
+      window.doConnect();
+    } else {
+      document.getElementById('tokenInput').focus();
+    }
     document.getElementById('tokenInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') window.doConnect(); });
     document.getElementById('commandInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') window.runCommand(); });
-    document.getElementById('projectPathInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') window.addProject(); });
+    document.getElementById('fpManualInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') window.manualAddProject(); });
   });
 
 })();

@@ -45,6 +45,18 @@ export interface ProjectInfo {
   isValid: boolean;
 }
 
+export interface DirRoot {
+  name: string;
+  path: string;
+}
+
+export interface DirEntry {
+  name: string;
+  path: string;
+  hasGit: boolean;
+  hasSubdirs: boolean;
+}
+
 // WebSocket protocol: Client -> Server
 export type ClientMessage =
   | { type: 'session:list' }
@@ -67,6 +79,8 @@ export type ClientMessage =
   | { type: 'git:diff'; workdir: string; filePath: string; staged: boolean }
   | { type: 'git:fileChanges'; workdir: string }
   | { type: 'command:run'; workdir: string; command: string }
+  | { type: 'dir:roots' }
+  | { type: 'dir:browse'; path: string }
   | { type: 'ping' };
 
 // WebSocket protocol: Server -> Client
@@ -93,5 +107,8 @@ export type ServerMessage =
   | { type: 'git:fileChanges'; workdir: string; result: import('./git').FileChangesResult }
   | { type: 'git:error'; workdir: string; error: string }
   | { type: 'command:started'; sessionId: string; workdir: string; command: string }
+  | { type: 'dir:roots'; roots: DirRoot[] }
+  | { type: 'dir:browse'; path: string; dirs: DirEntry[]; parent?: string }
+  | { type: 'dir:error'; error: string }
   | { type: 'pong' }
   | { type: 'error'; message: string };

@@ -155,6 +155,7 @@ class BoreManager extends EventEmitter {
       });
 
       let urlResolved = false;
+      let lastStderr = '';
 
       this.process.stdout?.on('data', (data: Buffer) => {
         const text = data.toString();
@@ -176,7 +177,9 @@ class BoreManager extends EventEmitter {
       });
 
       this.process.stderr?.on('data', (data: Buffer) => {
-        console.error('[bore]', data.toString().trim());
+        const text = data.toString().trim();
+        console.error('[bore]', text);
+        if (text) lastStderr = text;
       });
 
       this.process.on('error', (error) => {
@@ -197,7 +200,10 @@ class BoreManager extends EventEmitter {
           installed: true,
           version: check.version,
           running: false,
-          error: code !== null && code !== 0 ? `Process exited with code ${code}` : undefined,
+          error:
+            code !== null && code !== 0
+              ? lastStderr || `Process exited with code ${code}`
+              : undefined,
         };
         this.process = null;
         this.emit('statusChanged', this.status);

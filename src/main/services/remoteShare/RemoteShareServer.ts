@@ -1,9 +1,21 @@
 import { EventEmitter } from 'node:events';
 import * as fs from 'node:fs';
 import * as http from 'node:http';
+import { homedir } from 'node:os';
 import * as path from 'node:path';
-import type { ClientMessage, ProjectInfo, RemoteShareConfig, RemoteShareStatus, ServerMessage } from '@shared/types';
-import type { GitLogEntry, GitStatus, FileChangesResult, FileDiff } from '@shared/types';
+import type {
+  ClientMessage,
+  DirEntry,
+  DirRoot,
+  FileChangesResult,
+  FileDiff,
+  GitLogEntry,
+  GitStatus,
+  ProjectInfo,
+  RemoteShareConfig,
+  RemoteShareStatus,
+  ServerMessage,
+} from '@shared/types';
 import { type WebSocket, WebSocketServer } from 'ws';
 import { GitService } from '../git/GitService';
 import type { PtyManager } from '../terminal/PtyManager';
@@ -34,13 +46,52 @@ const WEB_DIR = resolveWebDir();
 
 // Binary file extensions to skip in file read
 const BINARY_EXTENSIONS = new Set([
-  '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.ico', '.webp', '.svg',
-  '.mp3', '.mp4', '.avi', '.mov', '.mkv', '.webm', '.flac', '.wav',
-  '.zip', '.tar', '.gz', '.rar', '.7z', '.bz2', '.xz',
-  '.exe', '.dll', '.so', '.dylib', '.bin', '.obj', '.o', '.a',
-  '.woff', '.woff2', '.ttf', '.eot', '.otf',
-  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-  '.sqlite', '.db', '.wasm',
+  '.png',
+  '.jpg',
+  '.jpeg',
+  '.gif',
+  '.bmp',
+  '.ico',
+  '.webp',
+  '.svg',
+  '.mp3',
+  '.mp4',
+  '.avi',
+  '.mov',
+  '.mkv',
+  '.webm',
+  '.flac',
+  '.wav',
+  '.zip',
+  '.tar',
+  '.gz',
+  '.rar',
+  '.7z',
+  '.bz2',
+  '.xz',
+  '.exe',
+  '.dll',
+  '.so',
+  '.dylib',
+  '.bin',
+  '.obj',
+  '.o',
+  '.a',
+  '.woff',
+  '.woff2',
+  '.ttf',
+  '.eot',
+  '.otf',
+  '.pdf',
+  '.doc',
+  '.docx',
+  '.xls',
+  '.xlsx',
+  '.ppt',
+  '.pptx',
+  '.sqlite',
+  '.db',
+  '.wasm',
 ]);
 
 const MAX_FILE_READ_SIZE = 1024 * 1024; // 1MB
@@ -302,6 +353,13 @@ export class RemoteShareServer extends EventEmitter {
       case 'command:run':
         this.handleCommandRun(ws, msg);
         break;
+      // Directory browsing
+      case 'dir:roots':
+        this.handleDirRoots(ws);
+        break;
+      case 'dir:browse':
+        this.handleDirBrowse(ws, msg.path);
+        break;
     }
   }
 
@@ -345,7 +403,10 @@ export class RemoteShareServer extends EventEmitter {
     this.remoteSessionOwners.set(id, ws);
 
     const info = this.ptyManager.listSessions().find((s) => s.id === id);
-    this.send(ws, { type: 'session:created', session: info ? { ...info, isLocal: false } : { id, cwd: msg.cwd || '', isLocal: false } });
+    this.send(ws, {
+      type: 'session:created',
+      session: info ? { ...info, isLocal: false } : { id, cwd: msg.cwd || '', isLocal: false },
+    });
 
     // Auto-connect to the new session
     this.handleSessionConnect(ws, id);
@@ -435,7 +496,10 @@ export class RemoteShareServer extends EventEmitter {
 
       this.send(ws, { type: 'project:added', project: info });
     } catch (error) {
-      this.send(ws, { type: 'project:error', error: error instanceof Error ? error.message : String(error) });
+      this.send(ws, {
+        type: 'project:error',
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -471,11 +535,18 @@ export class RemoteShareServer extends EventEmitter {
       const status: GitStatus = await git.getStatus();
       this.send(ws, { type: 'git:status', workdir, status });
     } catch (error) {
-      this.send(ws, { type: 'git:error', workdir, error: error instanceof Error ? error.message : String(error) });
+      this.send(ws, {
+        type: 'git:error',
+        workdir,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
-  private async handleGitLog(ws: WebSocket, msg: { workdir: string; maxCount?: number; skip?: number }): Promise<void> {
+  private async handleGitLog(
+    ws: WebSocket,
+    msg: { workdir: string; maxCount?: number; skip?: number }
+  ): Promise<void> {
     if (!this.validateProjectWorkdir(msg.workdir)) {
       this.send(ws, { type: 'git:error', workdir: msg.workdir, error: '项目未注册' });
       return;
@@ -485,11 +556,18 @@ export class RemoteShareServer extends EventEmitter {
       const entries: GitLogEntry[] = await git.getLog(msg.maxCount || 20, msg.skip);
       this.send(ws, { type: 'git:log', workdir: msg.workdir, entries });
     } catch (error) {
-      this.send(ws, { type: 'git:error', workdir: msg.workdir, error: error instanceof Error ? error.message : String(error) });
+      this.send(ws, {
+        type: 'git:error',
+        workdir: msg.workdir,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
-  private async handleGitStage(ws: WebSocket, msg: { workdir: string; paths: string[] }): Promise<void> {
+  private async handleGitStage(
+    ws: WebSocket,
+    msg: { workdir: string; paths: string[] }
+  ): Promise<void> {
     if (!this.validateProjectWorkdir(msg.workdir)) {
       this.send(ws, { type: 'git:error', workdir: msg.workdir, error: '项目未注册' });
       return;
@@ -499,11 +577,18 @@ export class RemoteShareServer extends EventEmitter {
       await git.stage(msg.paths);
       this.send(ws, { type: 'git:staged', workdir: msg.workdir });
     } catch (error) {
-      this.send(ws, { type: 'git:error', workdir: msg.workdir, error: error instanceof Error ? error.message : String(error) });
+      this.send(ws, {
+        type: 'git:error',
+        workdir: msg.workdir,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
-  private async handleGitUnstage(ws: WebSocket, msg: { workdir: string; paths: string[] }): Promise<void> {
+  private async handleGitUnstage(
+    ws: WebSocket,
+    msg: { workdir: string; paths: string[] }
+  ): Promise<void> {
     if (!this.validateProjectWorkdir(msg.workdir)) {
       this.send(ws, { type: 'git:error', workdir: msg.workdir, error: '项目未注册' });
       return;
@@ -513,11 +598,18 @@ export class RemoteShareServer extends EventEmitter {
       await git.unstage(msg.paths);
       this.send(ws, { type: 'git:unstaged', workdir: msg.workdir });
     } catch (error) {
-      this.send(ws, { type: 'git:error', workdir: msg.workdir, error: error instanceof Error ? error.message : String(error) });
+      this.send(ws, {
+        type: 'git:error',
+        workdir: msg.workdir,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
-  private async handleGitCommit(ws: WebSocket, msg: { workdir: string; message: string; files?: string[] }): Promise<void> {
+  private async handleGitCommit(
+    ws: WebSocket,
+    msg: { workdir: string; message: string; files?: string[] }
+  ): Promise<void> {
     if (!this.validateProjectWorkdir(msg.workdir)) {
       this.send(ws, { type: 'git:error', workdir: msg.workdir, error: '项目未注册' });
       return;
@@ -527,11 +619,18 @@ export class RemoteShareServer extends EventEmitter {
       const hash = await git.commit(msg.message, msg.files);
       this.send(ws, { type: 'git:committed', workdir: msg.workdir, hash });
     } catch (error) {
-      this.send(ws, { type: 'git:error', workdir: msg.workdir, error: error instanceof Error ? error.message : String(error) });
+      this.send(ws, {
+        type: 'git:error',
+        workdir: msg.workdir,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
-  private async handleGitDiff(ws: WebSocket, msg: { workdir: string; filePath: string; staged: boolean }): Promise<void> {
+  private async handleGitDiff(
+    ws: WebSocket,
+    msg: { workdir: string; filePath: string; staged: boolean }
+  ): Promise<void> {
     if (!this.validateProjectWorkdir(msg.workdir)) {
       this.send(ws, { type: 'git:error', workdir: msg.workdir, error: '项目未注册' });
       return;
@@ -541,7 +640,11 @@ export class RemoteShareServer extends EventEmitter {
       const diff: FileDiff = await git.getFileDiff(msg.filePath, msg.staged);
       this.send(ws, { type: 'git:diff', workdir: msg.workdir, filePath: msg.filePath, diff });
     } catch (error) {
-      this.send(ws, { type: 'git:error', workdir: msg.workdir, error: error instanceof Error ? error.message : String(error) });
+      this.send(ws, {
+        type: 'git:error',
+        workdir: msg.workdir,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -555,7 +658,11 @@ export class RemoteShareServer extends EventEmitter {
       const result: FileChangesResult = await git.getFileChanges();
       this.send(ws, { type: 'git:fileChanges', workdir, result });
     } catch (error) {
-      this.send(ws, { type: 'git:error', workdir, error: error instanceof Error ? error.message : String(error) });
+      this.send(ws, {
+        type: 'git:error',
+        workdir,
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 
@@ -584,7 +691,12 @@ export class RemoteShareServer extends EventEmitter {
     );
 
     this.remoteSessionOwners.set(id, ws);
-    this.send(ws, { type: 'command:started', sessionId: id, workdir: msg.workdir, command: msg.command });
+    this.send(ws, {
+      type: 'command:started',
+      sessionId: id,
+      workdir: msg.workdir,
+      command: msg.command,
+    });
 
     // Auto-connect to the command session
     this.handleSessionConnect(ws, id);
@@ -650,6 +762,95 @@ export class RemoteShareServer extends EventEmitter {
       this.send(ws, { type: 'file:read', path: resolved, content });
     } catch (error) {
       this.send(ws, { type: 'file:error', path: filePath, error: '无法读取文件' });
+    }
+  }
+
+  // --- Directory Browsing (Folder Picker) ---
+
+  private handleDirRoots(ws: WebSocket): void {
+    const roots: DirRoot[] = [];
+    const home = homedir();
+    roots.push({ name: '主目录', path: home });
+
+    // Common user folders
+    for (const [name, sub] of [
+      ['桌面', 'Desktop'],
+      ['文档', 'Documents'],
+      ['下载', 'Downloads'],
+    ] as const) {
+      const p = path.join(home, sub);
+      try {
+        if (fs.statSync(p).isDirectory()) roots.push({ name, path: p });
+      } catch {
+        /* skip */
+      }
+    }
+
+    // Windows: only check common drives (A-Z scan is extremely slow)
+    if (process.platform === 'win32') {
+      for (const letter of 'CDEFG') {
+        const drive = `${letter}:\\`;
+        try {
+          fs.accessSync(drive, fs.constants.R_OK);
+          roots.push({ name: `${letter}: 盘`, path: drive });
+        } catch {
+          /* skip */
+        }
+      }
+    }
+
+    this.send(ws, { type: 'dir:roots', roots });
+  }
+
+  private async handleDirBrowse(ws: WebSocket, dirPath: string): Promise<void> {
+    try {
+      const resolved = path.resolve(dirPath);
+      const stat = await fs.promises.stat(resolved).catch(() => null);
+      if (!stat || !stat.isDirectory()) {
+        this.send(ws, { type: 'dir:error', error: '路径不存在或不是目录' });
+        return;
+      }
+
+      const entries = await fs.promises.readdir(resolved, { withFileTypes: true });
+      const dirs: DirEntry[] = [];
+
+      // Check .git for all dirs in parallel
+      const checks = entries
+        .filter((e) => e.isDirectory() && !e.name.startsWith('.'))
+        .map(async (entry) => {
+          const fullPath = path.join(resolved, entry.name);
+          try {
+            await fs.promises.access(path.join(fullPath, '.git'));
+            return { name: entry.name, path: fullPath, hasGit: true, hasSubdirs: true };
+          } catch {
+            return { name: entry.name, path: fullPath, hasGit: false, hasSubdirs: true };
+          }
+        });
+
+      const results = await Promise.allSettled(checks);
+      for (const r of results) {
+        if (r.status === 'fulfilled') dirs.push(r.value);
+      }
+
+      // Sort: git repos first, then alphabetically
+      dirs.sort((a, b) => {
+        if (a.hasGit && !b.hasGit) return -1;
+        if (!a.hasGit && b.hasGit) return 1;
+        return a.name.localeCompare(b.name);
+      });
+
+      const parent = path.dirname(resolved);
+      this.send(ws, {
+        type: 'dir:browse',
+        path: resolved,
+        dirs,
+        parent: resolved !== parent ? parent : undefined,
+      });
+    } catch (error) {
+      this.send(ws, {
+        type: 'dir:error',
+        error: error instanceof Error ? error.message : String(error),
+      });
     }
   }
 }

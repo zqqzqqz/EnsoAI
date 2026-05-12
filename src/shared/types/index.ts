@@ -12,6 +12,8 @@ export * from './prompts';
 export type {
   BoreStatus,
   ClientMessage,
+  DirEntry,
+  DirRoot,
   ProjectInfo,
   RemoteSessionInfo,
   RemoteShareConfig,
