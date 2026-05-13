@@ -38,6 +38,7 @@ import {
   cleanupAllResourcesSync,
   registerIpcHandlers,
 } from './ipc';
+import { registerAgentTaskPanelHandlers } from './ipc/agentTaskPanel';
 import { initClaudeProviderWatcher } from './ipc/claudeProvider';
 import { cleanupTempFiles } from './ipc/files';
 import { readSettings } from './ipc/settings';
@@ -54,6 +55,7 @@ import { setCurrentLocale } from './services/i18n';
 import { buildAppMenu } from './services/MenuBuilder';
 import { webInspectorServer } from './services/webInspector';
 import log, { initLogger } from './utils/logger';
+import { destroyAgentTaskPanelWindow } from './windows/AgentTaskPanelWindow';
 import { createMainWindow } from './windows/MainWindow';
 
 let mainWindow: BrowserWindow | null = null;
@@ -638,12 +640,16 @@ app.whenReady().then(async () => {
   // Register window control handlers (must be after mainWindow is created)
   cleanupWindowHandlers = registerWindowHandlers(mainWindow);
 
+  // Register agent task panel IPC handlers
+  registerAgentTaskPanelHandlers(mainWindow);
+
   // Clean up window handlers when window is closed
   mainWindow.on('closed', () => {
     if (cleanupWindowHandlers) {
       cleanupWindowHandlers();
       cleanupWindowHandlers = null;
     }
+    destroyAgentTaskPanelWindow();
     webInspectorServer.setMainWindow(null);
     mainWindow = null;
   });
