@@ -786,9 +786,9 @@ export class RemoteShareServer extends EventEmitter {
       }
     }
 
-    // Windows: only check common drives (A-Z scan is extremely slow)
+    // Windows: scan all drive letters (accessSync on missing drives returns immediately)
     if (process.platform === 'win32') {
-      for (const letter of 'CDEFG') {
+      for (const letter of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') {
         const drive = `${letter}:\\`;
         try {
           fs.accessSync(drive, fs.constants.R_OK);
