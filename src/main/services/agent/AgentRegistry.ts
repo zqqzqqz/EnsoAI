@@ -43,6 +43,20 @@ export const BUILTIN_AGENTS: AgentMetadata[] = [
       fileWrite: false,
     },
   },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    description: 'DeepSeek TUI CLI',
+    icon: 'deepseek',
+    binary: 'deepseek',
+    capabilities: {
+      chat: true,
+      codeEdit: true,
+      terminal: true,
+      fileRead: true,
+      fileWrite: true,
+    },
+  },
 ];
 
 export class AgentRegistry {

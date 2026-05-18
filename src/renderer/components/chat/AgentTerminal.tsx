@@ -305,15 +305,20 @@ export function AgentTerminal({
     // Use custom path if provided, otherwise use agentCommand
     const effectiveCommand = customPath || agentCommand;
 
-    const supportsSession = agentCommand?.startsWith('claude') || agentCommand === 'cursor-agent';
+    const isDeepSeek = agentCommand?.startsWith('deepseek');
+    const supportsSession =
+      agentCommand?.startsWith('claude') || agentCommand === 'cursor-agent' || isDeepSeek;
     // Only Claude CLI supports --ide; Cursor CLI does not (errors with "unknown option '--ide'")
     const supportIde = agentCommand?.startsWith('claude');
     const effectiveSessionId = resumeSessionId;
 
-    // Build agent args: cursor-agent and initialized claude use --resume; otherwise --session-id
+    // Build agent args based on agent type
     let agentArgs: string[] = [];
     if (supportsSession && effectiveSessionId) {
-      if (agentCommand === 'cursor-agent' || initialized) {
+      if (isDeepSeek) {
+        // DeepSeek uses 'resume <sessionId>' subcommand
+        agentArgs = ['resume', effectiveSessionId];
+      } else if (agentCommand === 'cursor-agent' || initialized) {
         agentArgs = ['--resume', effectiveSessionId];
       } else {
         agentArgs = ['--session-id', effectiveSessionId];
@@ -358,11 +363,7 @@ export function AgentTerminal({
 
     let envVars: Record<string, string> | undefined;
 
-    if (
-      isWindows &&
-      isCodexAgent(agentId, agentCommand) &&
-      !hasCodexAltScreenFlag(customArgs)
-    ) {
+    if (isWindows && isCodexAgent(agentId, agentCommand) && !hasCodexAltScreenFlag(customArgs)) {
       agentArgs.unshift('--no-alt-screen');
     }
 

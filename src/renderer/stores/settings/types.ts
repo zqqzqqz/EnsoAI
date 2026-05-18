@@ -581,4 +581,5 @@ export const BUILTIN_AGENT_IDS: BuiltinAgentId[] = [
   'auggie',
   'cursor',
   'opencode',
+  'deepseek',
 ];

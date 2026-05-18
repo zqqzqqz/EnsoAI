@@ -72,6 +72,13 @@ const BUILTIN_AGENT_CONFIGS: BuiltinAgentConfig[] = [
     versionFlag: '--version',
     versionRegex: /(\d+\.\d+\.\d+)/,
   },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    command: 'deepseek',
+    versionFlag: '--version',
+    versionRegex: /(\d+\.\d+\.\d+)/,
+  },
 ];
 
 class CliDetector {
