@@ -1,0 +1,945 @@
+- generic [ref=e2]:
+  - generic:
+    - generic:
+      - tooltip "This user is a member of the microsoft organization."
+    - generic:
+      - tooltip "This user is a member of the microsoft organization."
+    - generic:
+      - tooltip "This user has previously committed to the terminal repository."
+    - generic:
+      - tooltip "This user has previously committed to the terminal repository."
+    - generic:
+      - tooltip "This user is a member of the microsoft organization."
+    - generic:
+      - tooltip "This user is a member of the microsoft organization."
+  - generic [ref=e3]:
+    - link "Skip to content" [ref=e4] [cursor=pointer]:
+      - /url: "#start-of-content"
+    - banner [ref=e6]:
+      - heading "Navigation Menu" [level=2] [ref=e7]
+      - generic [ref=e9]:
+        - button "Toggle navigation" [ref=e11] [cursor=pointer]
+        - link "Homepage" [ref=e17] [cursor=pointer]:
+          - /url: /
+          - img [ref=e18]
+        - generic [ref=e20]:
+          - link "Sign in" [ref=e21] [cursor=pointer]:
+            - /url: /login?return_to=https%3A%2F%2Fgithub.com%2Fmicrosoft%2Fterminal%2Fissues%2F545
+          - button "Appearance settings" [ref=e24] [cursor=pointer]:
+            - img
+  - main [ref=e28]:
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - generic [ref=e32]:
+          - img [ref=e33]
+          - link "microsoft" [ref=e36] [cursor=pointer]:
+            - /url: /microsoft
+          - generic [ref=e37]: /
+          - strong [ref=e38]:
+            - link "terminal" [ref=e39] [cursor=pointer]:
+              - /url: /microsoft/terminal
+          - generic [ref=e40]: Public
+        - generic [ref=e41]:
+          - list:
+            - listitem [ref=e42]:
+              - link "You must be signed in to change notification settings" [ref=e43] [cursor=pointer]:
+                - /url: /login?return_to=%2Fmicrosoft%2Fterminal
+                - img [ref=e44]
+                - text: Notifications
+            - listitem [ref=e46]:
+              - link "Fork 9.3k" [ref=e47] [cursor=pointer]:
+                - /url: /login?return_to=%2Fmicrosoft%2Fterminal
+                - img [ref=e48]
+                - text: Fork
+                - generic "9,288" [ref=e50]: 9.3k
+            - listitem [ref=e51]:
+              - link "You must be signed in to star a repository" [ref=e53] [cursor=pointer]:
+                - /url: /login?return_to=%2Fmicrosoft%2Fterminal
+                - img [ref=e54]
+                - text: Star
+                - generic "103215 users starred this repository" [ref=e56]: 103k
+      - navigation "Repository" [ref=e57]:
+        - list [ref=e58]:
+          - listitem [ref=e59]:
+            - link "Code" [ref=e60] [cursor=pointer]:
+              - /url: /microsoft/terminal
+              - img [ref=e61]
+              - generic [ref=e63]: Code
+          - listitem [ref=e64]:
+            - link "Issues 1.7k" [ref=e65] [cursor=pointer]:
+              - /url: /microsoft/terminal/issues
+              - img [ref=e66]
+              - generic [ref=e69]: Issues
+              - generic "1,664" [ref=e70]: 1.7k
+          - listitem [ref=e71]:
+            - link "Pull requests 73" [ref=e72] [cursor=pointer]:
+              - /url: /microsoft/terminal/pulls
+              - img [ref=e73]
+              - generic [ref=e75]: Pull requests
+              - generic "73" [ref=e76]
+          - listitem [ref=e77]:
+            - link "Discussions" [ref=e78] [cursor=pointer]:
+              - /url: /microsoft/terminal/discussions
+              - img [ref=e79]
+              - generic [ref=e81]: Discussions
+          - listitem [ref=e82]:
+            - link "Actions" [ref=e83] [cursor=pointer]:
+              - /url: /microsoft/terminal/actions
+              - img [ref=e84]
+              - generic [ref=e86]: Actions
+          - listitem [ref=e87]:
+            - link "Projects" [ref=e88] [cursor=pointer]:
+              - /url: /microsoft/terminal/projects
+              - img [ref=e89]
+              - generic [ref=e91]: Projects
+          - listitem [ref=e92]:
+            - link "Models" [ref=e93] [cursor=pointer]:
+              - /url: /microsoft/terminal/models
+              - img [ref=e94]
+              - generic [ref=e96]: Models
+          - listitem [ref=e97]
+          - listitem [ref=e98]
+          - listitem [ref=e99]
+        - button "Additional navigation options" [ref=e103] [cursor=pointer]:
+          - img
+    - generic [ref=e111]:
+      - region "Header" [ref=e113]:
+        - generic [ref=e114]:
+          - 'heading "[Terminal] VT Mouse Support #545" [level=1] [ref=e116]'
+          - generic [ref=e118]:
+            - link "New issue" [ref=e120] [cursor=pointer]:
+              - /url: /login?return_to=https://github.com/microsoft/terminal/issues/545
+              - generic [ref=e122]: New issue
+            - button "Copy link" [ref=e123] [cursor=pointer]:
+              - img [ref=e124]
+      - generic [ref=e130]:
+        - generic [ref=e132]:
+          - img "Issue" [ref=e133]
+          - text: Closed
+        - 'link "Merged #4859" [ref=e137] [cursor=pointer]':
+          - /url: https://github.com/microsoft/terminal/pull/4859
+          - img "Merged" [ref=e138]
+          - generic [ref=e140]: "#4859"
+      - generic [ref=e142]:
+        - generic [ref=e143]:
+          - generic [ref=e145]:
+            - link "@cerebrate's profile" [ref=e146] [cursor=pointer]:
+              - /url: https://github.com/cerebrate
+              - img "@cerebrate" [ref=e147]
+            - generic [ref=e148]:
+              - heading "Description" [level=2] [ref=e149]
+              - generic [ref=e151]:
+                - generic [ref=e153]:
+                  - generic [ref=e154]:
+                    - link "cerebrate" [ref=e156] [cursor=pointer]:
+                      - /url: https://github.com/cerebrate
+                    - generic [ref=e157]:
+                      - text: opened
+                      - link "on May 8, 2019on May 8, 2019" [ref=e158] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#issue-441494703
+                        - generic "May 8, 2019, 8:05 AM GMT+8" [ref=e159]: on May 8, 2019on May 8, 2019
+                  - generic [ref=e160]:
+                    - button "Last edited by cerebrate" [ref=e163] [cursor=pointer]:
+                      - generic [ref=e166]: Last edited by cerebrate
+                      - generic:
+                        - img
+                    - button "Issue body actions" [ref=e169] [cursor=pointer]:
+                      - img [ref=e170]
+                - generic [ref=e172]:
+                  - generic [ref=e174]:
+                    - list [ref=e175]:
+                      - listitem [ref=e176]:
+                        - text: "Your Windows build number: (Type"
+                        - code [ref=e177]: ver
+                        - text: at a Windows Command Prompt)
+                    - paragraph [ref=e178]: 10.0.18890.1000
+                    - list [ref=e179]:
+                      - listitem [ref=e180]: "What you're doing and what's happening: (Copy & paste specific commands and their output, or include screen shots)"
+                    - paragraph [ref=e181]: "I routinely use mouse mode in tmux with WSL for window selection, pane resizing, and scrollback, enabled in tmux.conf thus:"
+                    - generic [ref=e182]:
+                      - code [ref=e184]: "# -- mouse support --------------------------------------------------------- # Enable mouse control (clickable windows, panes, resizable panes) set -g mouse on"
+                      - button "Copy code to clipboard" [ref=e186] [cursor=pointer]:
+                        - img [ref=e187]
+                    - paragraph [ref=e190]: While this works perfectly in conhost, it does not work at all in Terminal; nothing happens, as if the mouse events were never reaching tmux.
+                    - list [ref=e191]:
+                      - listitem [ref=e192]: "What's wrong / what should be happening instead:"
+                    - paragraph [ref=e193]: tmux mouse support (and presumably other mouse-supporting applications) should work as they do in conhost.
+                  - toolbar "Reactions" [ref=e195]:
+                    - switch "👍 118 reactions" [ref=e196]:
+                      - generic [ref=e197]:
+                        - generic: 👍
+                        - generic [ref=e198]:
+                          - generic [ref=e199]: React with 👍
+                          - text: "118"
+          - generic [ref=e201]:
+            - generic [ref=e202]:
+              - heading "Activity" [level=2] [ref=e203]
+              - link [ref=e204] [cursor=pointer]:
+                - /url: /microsoft/terminal/issues/545?timeline_page=1
+                - text: Next
+              - generic [ref=e205]:
+                - region "Events" [ref=e206]:
+                  - generic [ref=e213]:
+                    - img [ref=e217]
+                    - generic [ref=e221]:
+                      - link "zadjii-msft" [ref=e223] [cursor=pointer]:
+                        - /url: /zadjii-msft
+                        - generic [ref=e224]: zadjii-msft
+                      - text: changed the title
+                      - deletion [ref=e226]:
+                        - generic [ref=e227]: "[-]"
+                        - text: tmux mouse support not functioning in Terminal
+                        - generic [ref=e228]: "[/-]"
+                      - insertion [ref=e230]:
+                        - generic [ref=e231]: "[+]"
+                        - text: "[Terminal] VT Mouse Support"
+                        - generic [ref=e232]: "[/+]"
+                      - link "on May 8, 2019on May 8, 2019" [ref=e233] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#event-2327327348
+                        - generic "May 8, 2019, 9:55 PM GMT+8" [ref=e234]: on May 8, 2019on May 8, 2019
+                - generic [ref=e235]:
+                  - link "@zadjii-msft's profile" [ref=e236] [cursor=pointer]:
+                    - /url: https://github.com/zadjii-msft
+                    - img "zadjii-msft" [ref=e237]
+                  - generic [ref=e244]:
+                    - generic [ref=e246]:
+                      - heading "zadjii-msft commented on May 8, 2019 on May 8, 2019" [level=3] [ref=e247]:
+                        - text: zadjii-msft commented
+                        - generic "May 8, 2019, 9:57 PM GMT+8" [ref=e248]: on May 8, 2019 on May 8, 2019
+                      - generic [ref=e249]:
+                        - link "zadjii-msft" [ref=e251] [cursor=pointer]:
+                          - /url: /zadjii-msft
+                        - link "on May 8, 2019on May 8, 2019" [ref=e254] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-490496161
+                          - generic "May 8, 2019, 9:57 PM GMT+8" [ref=e255]: on May 8, 2019on May 8, 2019
+                      - generic [ref=e257]:
+                        - generic "This user is a member of the microsoft organization." [ref=e259]: Member
+                        - button "Actions for zadjii-msft's comment, 9:57 PM on May 8, 2019" [ref=e261] [cursor=pointer]:
+                          - img [ref=e262]
+                    - generic [ref=e264]:
+                      - generic [ref=e266]:
+                        - paragraph [ref=e267]: "Yea, this is a known issue at the moment. We need to add support for mouse in two places: both in the terminal, to be able to synthesize mouse sequences, and in conpty to be able to read mouse sequences."
+                        - paragraph [ref=e268]: This issue is tracking the first bit, the Terminal functionality.
+                        - paragraph [ref=e269]:
+                          - text: For the second bit, the conpty part, see
+                          - link "#376" [ref=e270] [cursor=pointer]:
+                            - /url: https://github.com/microsoft/terminal/issues/376
+                          - text: .
+                      - toolbar "Reactions" [ref=e271]:
+                        - switch "👍 17 reactions" [ref=e272]:
+                          - generic [ref=e273]:
+                            - generic: 👍
+                            - generic [ref=e274]:
+                              - generic [ref=e275]: React with 👍
+                              - text: "17"
+                - region "Events" [ref=e276]:
+                  - generic [ref=e283]:
+                    - img [ref=e287]
+                    - generic [ref=e291]:
+                      - link "zadjii-msft" [ref=e293] [cursor=pointer]:
+                        - /url: /zadjii-msft
+                        - generic [ref=e294]: zadjii-msft
+                      - text: added this to the
+                      - link "Windows Terminal v1.0" [ref=e295] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/milestone/6
+                      - text: milestone
+                      - link "on May 8, 2019on May 8, 2019" [ref=e296] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#event-2327334070
+                        - generic "May 8, 2019, 9:57 PM GMT+8" [ref=e297]: on May 8, 2019on May 8, 2019
+                  - generic [ref=e301]:
+                    - img [ref=e305]
+                    - generic [ref=e309]:
+                      - link "zadjii-msft" [ref=e311] [cursor=pointer]:
+                        - /url: /zadjii-msft
+                        - generic [ref=e312]: zadjii-msft
+                      - text: added
+                      - link "Issue-Feature Complex enough to require an in depth planning process and actual budgeted, scheduled work." [ref=e314] [cursor=pointer]:
+                        - /url: /microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Issue-Feature%22
+                        - generic [ref=e316]: Issue-Feature
+                        - generic [ref=e317]: Complex enough to require an in depth planning process and actual budgeted, scheduled work.
+                      - link "on May 8, 2019on May 8, 2019" [ref=e318] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#event-2327334309
+                        - generic "May 8, 2019, 9:57 PM GMT+8" [ref=e319]: on May 8, 2019on May 8, 2019
+                  - generic [ref=e326]:
+                    - img [ref=e330]
+                    - generic [ref=e332]:
+                      - generic [ref=e334]:
+                        - link "zadjii-msft" [ref=e336] [cursor=pointer]:
+                          - /url: /zadjii-msft
+                          - generic [ref=e337]: zadjii-msft
+                        - text: mentioned this
+                        - link "on May 10, 2019on May 10, 2019" [ref=e338] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#event-933162708
+                          - generic "May 10, 2019, 11:54 PM GMT+8" [ref=e339]: on May 10, 2019on May 10, 2019
+                      - region "Issues mentioned" [ref=e342]:
+                        - list [ref=e343]:
+                          - listitem [ref=e344]:
+                            - generic [ref=e345]:
+                              - img "Completed" [ref=e346]
+                              - 'link "Don''t seem to have mouse input to scroll or place cursor in WSL. (when using Micro text editor for example) #667" [ref=e349] [cursor=pointer]':
+                                - /url: https://github.com/microsoft/terminal/issues/667
+                                - text: Don't seem to have mouse input to scroll or place cursor in WSL. (when using Micro text editor for example)
+                                - generic [ref=e350]: "#667"
+                  - generic [ref=e357]:
+                    - img [ref=e361]
+                    - generic [ref=e365]:
+                      - link "miniksa" [ref=e367] [cursor=pointer]:
+                        - /url: /miniksa
+                        - generic [ref=e368]: miniksa
+                      - text: added
+                      - link "Mass-Chaos" [ref=e370] [cursor=pointer]:
+                        - /url: /microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Mass-Chaos%22
+                        - generic [ref=e372]: Mass-Chaos
+                      - link "on May 18, 2019on May 18, 2019" [ref=e374] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#event-2350439539
+                        - generic "May 18, 2019, 4:59 AM GMT+8" [ref=e375]: on May 18, 2019on May 18, 2019
+                  - generic [ref=e379]:
+                    - img [ref=e383]
+                    - generic [ref=e387]:
+                      - generic [ref=e388]: ghost
+                      - text: added
+                      - link "Needs-Tag-Fix Doesn't match tag requirements" [ref=e390] [cursor=pointer]:
+                        - /url: /microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Needs-Tag-Fix%22
+                        - generic [ref=e392]: Needs-Tag-Fix
+                        - generic [ref=e393]: Doesn't match tag requirements
+                      - link "on May 18, 2019on May 18, 2019" [ref=e394] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#event-2350439599
+                        - generic "May 18, 2019, 4:59 AM GMT+8" [ref=e395]: on May 18, 2019on May 18, 2019
+                  - generic [ref=e399]:
+                    - img [ref=e403]
+                    - generic [ref=e407]:
+                      - link "miniksa" [ref=e409] [cursor=pointer]:
+                        - /url: /miniksa
+                        - generic [ref=e410]: miniksa
+                      - text: added
+                      - link "Area-VT Virtual Terminal sequence support" [ref=e412] [cursor=pointer]:
+                        - /url: /microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Area-VT%22
+                        - generic [ref=e414]: Area-VT
+                        - generic [ref=e415]: Virtual Terminal sequence support
+                      - link "Product-Terminal The new Windows Terminal." [ref=e417] [cursor=pointer]:
+                        - /url: /microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Product-Terminal%22
+                        - generic [ref=e419]: Product-Terminal
+                        - generic [ref=e420]: The new Windows Terminal.
+                      - text: and removed
+                      - link "Mass-Chaos" [ref=e422] [cursor=pointer]:
+                        - /url: /microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Mass-Chaos%22
+                        - generic [ref=e424]: Mass-Chaos
+                      - link "on May 18, 2019on May 18, 2019" [ref=e426] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#event-2350445646
+                        - generic "May 18, 2019, 5:02 AM GMT+8" [ref=e427]: on May 18, 2019on May 18, 2019
+                  - generic [ref=e431]:
+                    - img [ref=e435]
+                    - generic [ref=e439]:
+                      - generic [ref=e440]: ghost
+                      - text: removed
+                      - link "Needs-Tag-Fix Doesn't match tag requirements" [ref=e442] [cursor=pointer]:
+                        - /url: /microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Needs-Tag-Fix%22
+                        - generic [ref=e444]: Needs-Tag-Fix
+                        - generic [ref=e445]: Doesn't match tag requirements
+                      - link "on May 18, 2019on May 18, 2019" [ref=e446] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#event-2350655456
+                        - generic "May 18, 2019, 7:40 AM GMT+8" [ref=e447]: on May 18, 2019on May 18, 2019
+                  - generic [ref=e451]:
+                    - img [ref=e455]
+                    - generic [ref=e459]:
+                      - link "miniksa" [ref=e461] [cursor=pointer]:
+                        - /url: /miniksa
+                        - generic [ref=e462]: miniksa
+                      - text: added
+                      - link "Area-Input Related to input processing (key presses, mouse, etc.)" [ref=e464] [cursor=pointer]:
+                        - /url: /microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Area-Input%22
+                        - generic [ref=e466]: Area-Input
+                        - generic [ref=e467]: Related to input processing (key presses, mouse, etc.)
+                      - link "on May 18, 2019on May 18, 2019" [ref=e468] [cursor=pointer]:
+                        - /url: https://github.com/microsoft/terminal/issues/545#event-2350655579
+                        - generic "May 18, 2019, 7:40 AM GMT+8" [ref=e469]: on May 18, 2019on May 18, 2019
+                  - generic [ref=e476]:
+                    - img [ref=e480]
+                    - generic [ref=e482]:
+                      - generic [ref=e484]:
+                        - link "DHowett-MSFT" [ref=e486] [cursor=pointer]:
+                          - /url: /DHowett-MSFT
+                          - generic [ref=e487]: DHowett-MSFT
+                        - text: mentioned this
+                        - link "on Jun 23, 2019on Jun 23, 2019" [ref=e488] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#event-963928097
+                          - generic "Jun 23, 2019, 5:49 AM GMT+8" [ref=e489]: on Jun 23, 2019on Jun 23, 2019
+                      - region "Issues mentioned" [ref=e492]:
+                        - list [ref=e493]:
+                          - listitem [ref=e494]:
+                            - generic [ref=e495]:
+                              - img "Completed" [ref=e496]
+                              - 'link "Feature Request: option to move up/down cursor using mousewheel in some apps #1440" [ref=e499] [cursor=pointer]':
+                                - /url: https://github.com/microsoft/terminal/issues/1440
+                                - text: "Feature Request: option to move up/down cursor using mousewheel in some apps"
+                                - generic [ref=e500]: "#1440"
+                - generic [ref=e501]:
+                  - link "@guibirow's profile" [ref=e502] [cursor=pointer]:
+                    - /url: https://github.com/guibirow
+                    - img "guibirow" [ref=e503]
+                  - generic [ref=e510]:
+                    - generic [ref=e512]:
+                      - heading "guibirow commented on Jun 25, 2019 on Jun 25, 2019" [level=3] [ref=e513]:
+                        - text: guibirow commented
+                        - generic "Jun 25, 2019, 9:09 PM GMT+8" [ref=e514]: on Jun 25, 2019 on Jun 25, 2019
+                      - generic [ref=e515]:
+                        - link "guibirow" [ref=e517] [cursor=pointer]:
+                          - /url: /guibirow
+                        - link "on Jun 25, 2019on Jun 25, 2019" [ref=e520] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-505437310
+                          - generic "Jun 25, 2019, 9:09 PM GMT+8" [ref=e521]: on Jun 25, 2019on Jun 25, 2019
+                      - button "Actions for guibirow's comment, 9:09 PM on June 25, 2019" [ref=e525] [cursor=pointer]:
+                        - img [ref=e526]
+                    - generic [ref=e528]:
+                      - paragraph [ref=e531]:
+                        - text: Sadly this does not work, having the mouse events with TMUX would defer the need to have multiple panes.
+                        - text: I hope this feature get implemented before the panes, is much needed and will solve most of issues
+                      - toolbar "Reactions"
+                - region "Events" [ref=e532]:
+                  - generic [ref=e539]:
+                    - img [ref=e543]
+                    - generic [ref=e545]:
+                      - generic [ref=e547]:
+                        - link "DHowett-MSFT" [ref=e549] [cursor=pointer]:
+                          - /url: /DHowett-MSFT
+                          - generic [ref=e550]: DHowett-MSFT
+                        - text: mentioned this
+                        - link "on Jun 26, 2019on Jun 26, 2019" [ref=e551] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#event-966374812
+                          - generic "Jun 26, 2019, 7:16 AM GMT+8" [ref=e552]: on Jun 26, 2019on Jun 26, 2019
+                      - region "Issues mentioned" [ref=e555]:
+                        - list [ref=e556]:
+                          - listitem [ref=e557]:
+                            - generic [ref=e558]:
+                              - img "Open" [ref=e559]
+                              - 'link "Feature Request: Mouse/Touch/Pointer Bindings (like middle-click paste, right-click context menu, etc.) #1553" [ref=e562] [cursor=pointer]':
+                                - /url: https://github.com/microsoft/terminal/issues/1553
+                                - text: "Feature Request: Mouse/Touch/Pointer Bindings (like middle-click paste, right-click context menu, etc.)"
+                                - generic [ref=e563]: "#1553"
+                - generic [ref=e572]:
+                  - heading "77 remaining items" [level=3] [ref=e574]:
+                    - text: "77"
+                    - generic [ref=e575]: remaining items
+                  - button "Load more" [ref=e577] [cursor=pointer]:
+                    - generic [ref=e580]: Load more
+                - generic [ref=e584]:
+                  - link "@zadjii-msft's profile" [ref=e585] [cursor=pointer]:
+                    - /url: https://github.com/zadjii-msft
+                    - img "zadjii-msft" [ref=e586]
+                  - generic [ref=e590]:
+                    - generic [ref=e592]:
+                      - heading "zadjii-msft commented on Mar 30, 2020 on Mar 30, 2020" [level=3] [ref=e593]:
+                        - text: zadjii-msft commented
+                        - generic "Mar 30, 2020, 10:31 PM GMT+8" [ref=e594]: on Mar 30, 2020 on Mar 30, 2020
+                      - generic [ref=e595]:
+                        - link "zadjii-msft" [ref=e597] [cursor=pointer]:
+                          - /url: /zadjii-msft
+                        - link "on Mar 30, 2020on Mar 30, 2020" [ref=e600] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-606035537
+                          - generic "Mar 30, 2020, 10:31 PM GMT+8" [ref=e601]: on Mar 30, 2020on Mar 30, 2020
+                      - generic [ref=e603]:
+                        - generic "This user is a member of the microsoft organization." [ref=e605]: Member
+                        - button "Actions for zadjii-msft's comment, 10:31 PM on March 30, 2020" [ref=e607] [cursor=pointer]:
+                          - img [ref=e608]
+                    - generic [ref=e610]:
+                      - paragraph [ref=e613]:
+                        - link "@nicolus" [ref=e614] [cursor=pointer]:
+                          - /url: https://github.com/nicolus
+                        - text: indeed, mouse input only works for WSL applications currently. If you're using the Win32 version of micro, I'd bet that it won't work quite yet. You could probably work around this by running the WSL version for now.
+                        - link "#376" [ref=e615] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/376
+                        - text: is the issue we're using for the Windows mouse input
+                      - toolbar "Reactions"
+                - generic [ref=e616]:
+                  - link "@CodeMonkey90's profile" [ref=e617] [cursor=pointer]:
+                    - /url: https://github.com/CodeMonkey90
+                    - img "CodeMonkey90" [ref=e618]
+                  - generic [ref=e625]:
+                    - generic [ref=e627]:
+                      - heading "CodeMonkey90 commented on May 12, 2020 on May 12, 2020" [level=3] [ref=e628]:
+                        - text: CodeMonkey90 commented
+                        - generic "May 12, 2020, 2:19 AM GMT+8" [ref=e629]: on May 12, 2020 on May 12, 2020
+                      - generic [ref=e630]:
+                        - link "CodeMonkey90" [ref=e632] [cursor=pointer]:
+                          - /url: /CodeMonkey90
+                        - link "on May 12, 2020on May 12, 2020" [ref=e635] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-626870830
+                          - generic "May 12, 2020, 2:19 AM GMT+8" [ref=e636]: on May 12, 2020on May 12, 2020
+                      - generic [ref=e637]:
+                        - button "Last edited by CodeMonkey90" [ref=e640] [cursor=pointer]:
+                          - generic [ref=e643]: Last edited by CodeMonkey90
+                          - generic:
+                            - img
+                        - button "Actions for CodeMonkey90's comment, 2:19 AM on May 12, 2020" [ref=e646] [cursor=pointer]:
+                          - img [ref=e647]
+                    - generic [ref=e649]:
+                      - generic [ref=e651]:
+                        - paragraph [ref=e652]:
+                          - link "@zadjii-msft" [ref=e653] [cursor=pointer]:
+                            - /url: https://github.com/zadjii-msft
+                          - text: Mouse events don't work for me with a custom profile with
+                          - code [ref=e654]: "\"commandline\": \"ssh [...]\""
+                          - text: . Is this also expected until
+                          - link "#376" [ref=e655] [cursor=pointer]:
+                            - /url: https://github.com/microsoft/terminal/issues/376
+                          - text: is resolved? Is there a good workaround?
+                        - paragraph [ref=e656]:
+                          - strong [ref=e657]: Edit
+                          - text: ": Or is that just a result of"
+                          - link "PowerShell/Win32-OpenSSH#1310" [ref=e658] [cursor=pointer]:
+                            - /url: https://github.com/PowerShell/Win32-OpenSSH/issues/1310
+                          - text: and would work otherwise?
+                      - toolbar "Reactions"
+                - generic [ref=e659]:
+                  - link "@DHowett-MSFT's profile" [ref=e660] [cursor=pointer]:
+                    - /url: https://github.com/DHowett-MSFT
+                    - img "DHowett-MSFT" [ref=e661]
+                  - generic [ref=e668]:
+                    - generic [ref=e670]:
+                      - heading "DHowett-MSFT commented on May 12, 2020 on May 12, 2020" [level=3] [ref=e671]:
+                        - text: DHowett-MSFT commented
+                        - generic "May 12, 2020, 2:26 AM GMT+8" [ref=e672]: on May 12, 2020 on May 12, 2020
+                      - generic [ref=e673]:
+                        - link "DHowett-MSFT" [ref=e675] [cursor=pointer]:
+                          - /url: /DHowett-MSFT
+                        - link "on May 12, 2020on May 12, 2020" [ref=e678] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-626875066
+                          - generic "May 12, 2020, 2:26 AM GMT+8" [ref=e679]: on May 12, 2020on May 12, 2020
+                      - generic [ref=e681]:
+                        - generic "This user has previously committed to the terminal repository." [ref=e683]: Contributor
+                        - button "Actions for DHowett-MSFT's comment, 2:26 AM on May 12, 2020" [ref=e685] [cursor=pointer]:
+                          - img [ref=e686]
+                    - generic [ref=e688]:
+                      - paragraph [ref=e691]:
+                        - text: This is a result of
+                        - link "PowerShell/Win32-OpenSSH#1310" [ref=e692] [cursor=pointer]:
+                          - /url: https://github.com/PowerShell/Win32-OpenSSH/issues/1310
+                        - text: ", which is (mercifully) fixed in the 8.x series."
+                      - toolbar "Reactions" [ref=e693]:
+                        - switch "👍 2 reactions" [ref=e694]:
+                          - generic [ref=e695]:
+                            - generic: 👍
+                            - generic [ref=e696]:
+                              - generic [ref=e697]: React with 👍
+                              - text: "2"
+                - generic [ref=e698]:
+                  - link "@CodeMonkey90's profile" [ref=e699] [cursor=pointer]:
+                    - /url: https://github.com/CodeMonkey90
+                    - img "CodeMonkey90" [ref=e700]
+                  - generic [ref=e707]:
+                    - generic [ref=e709]:
+                      - heading "CodeMonkey90 commented on May 12, 2020 on May 12, 2020" [level=3] [ref=e710]:
+                        - text: CodeMonkey90 commented
+                        - generic "May 12, 2020, 2:31 AM GMT+8" [ref=e711]: on May 12, 2020 on May 12, 2020
+                      - generic [ref=e712]:
+                        - link "CodeMonkey90" [ref=e714] [cursor=pointer]:
+                          - /url: /CodeMonkey90
+                        - link "on May 12, 2020on May 12, 2020" [ref=e717] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-626878073
+                          - generic "May 12, 2020, 2:31 AM GMT+8" [ref=e718]: on May 12, 2020on May 12, 2020
+                      - button "Actions for CodeMonkey90's comment, 2:31 AM on May 12, 2020" [ref=e722] [cursor=pointer]:
+                        - img [ref=e723]
+                    - generic [ref=e725]:
+                      - paragraph [ref=e728]:
+                        - link "@DHowett-MSFT" [ref=e729] [cursor=pointer]:
+                          - /url: https://github.com/DHowett-MSFT
+                        - text: Thanks for the quick reply. In that case, is there a sane way to manually upgrade to a version with the fix right now or is it better to just wait?
+                      - toolbar "Reactions"
+                - generic [ref=e730]:
+                  - link "@DHowett-MSFT's profile" [ref=e731] [cursor=pointer]:
+                    - /url: https://github.com/DHowett-MSFT
+                    - img "DHowett-MSFT" [ref=e732]
+                  - generic [ref=e739]:
+                    - generic [ref=e741]:
+                      - heading "DHowett-MSFT commented on May 12, 2020 on May 12, 2020" [level=3] [ref=e742]:
+                        - text: DHowett-MSFT commented
+                        - generic "May 12, 2020, 2:45 AM GMT+8" [ref=e743]: on May 12, 2020 on May 12, 2020
+                      - generic [ref=e744]:
+                        - link "DHowett-MSFT" [ref=e746] [cursor=pointer]:
+                          - /url: /DHowett-MSFT
+                        - link "on May 12, 2020on May 12, 2020" [ref=e749] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-626886000
+                          - generic "May 12, 2020, 2:45 AM GMT+8" [ref=e750]: on May 12, 2020on May 12, 2020
+                      - generic [ref=e752]:
+                        - generic "This user has previously committed to the terminal repository." [ref=e754]: Contributor
+                        - button "Actions for DHowett-MSFT's comment, 2:45 AM on May 12, 2020" [ref=e756] [cursor=pointer]:
+                          - img [ref=e757]
+                    - generic [ref=e759]:
+                      - paragraph [ref=e762]: Sure, just download the latest release from their Releases page!
+                      - toolbar "Reactions" [ref=e763]:
+                        - switch "👍 2 reactions" [ref=e764]:
+                          - generic [ref=e765]:
+                            - generic: 👍
+                            - generic [ref=e766]:
+                              - generic [ref=e767]: React with 👍
+                              - text: "2"
+                - region "Events" [ref=e768]:
+                  - generic [ref=e775]:
+                    - img [ref=e779]
+                    - generic [ref=e781]:
+                      - generic [ref=e783]:
+                        - link "sosnik" [ref=e785] [cursor=pointer]:
+                          - /url: /sosnik
+                          - generic [ref=e786]: sosnik
+                        - text: mentioned this
+                        - link "on Dec 13, 2020on Dec 13, 2020" [ref=e787] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#event-1063172502
+                          - generic "Dec 13, 2020, 6:56 PM GMT+8" [ref=e788]: on Dec 13, 2020on Dec 13, 2020
+                      - region "Issues mentioned" [ref=e791]:
+                        - list [ref=e792]:
+                          - listitem [ref=e793]:
+                            - generic [ref=e794]:
+                              - img "Open" [ref=e795]
+                              - 'link "Allow mouse clicks to reposition cursor by emitting cursor key sequences #8573" [ref=e798] [cursor=pointer]':
+                                - /url: https://github.com/microsoft/terminal/issues/8573
+                                - text: Allow mouse clicks to reposition cursor by emitting cursor key sequences
+                                - generic [ref=e799]: "#8573"
+                  - generic [ref=e803]:
+                    - img [ref=e807]
+                    - generic [ref=e809]:
+                      - generic [ref=e811]:
+                        - link "DHowett" [ref=e813] [cursor=pointer]:
+                          - /url: /DHowett
+                          - generic [ref=e814]: DHowett
+                        - text: mentioned this
+                        - link "on Jun 4, 2021on Jun 4, 2021" [ref=e815] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#event-1117693172
+                          - generic "Jun 4, 2021, 2:34 AM GMT+8" [ref=e816]: on Jun 4, 2021on Jun 4, 2021
+                      - region "Issues mentioned" [ref=e819]:
+                        - list [ref=e820]:
+                          - listitem [ref=e821]:
+                            - generic [ref=e822]:
+                              - img "Open" [ref=e823]
+                              - 'link "ViM mousing only partially works, works different across different platforms #10321" [ref=e826] [cursor=pointer]':
+                                - /url: https://github.com/microsoft/terminal/issues/10321
+                                - text: ViM mousing only partially works, works different across different platforms
+                                - generic [ref=e827]: "#10321"
+                - generic [ref=e828]:
+                  - link "@rfc805's profile" [ref=e829] [cursor=pointer]:
+                    - /url: https://github.com/rfc805
+                    - img "rfc805" [ref=e830]
+                  - generic [ref=e837]:
+                    - generic [ref=e839]:
+                      - heading "rfc805 commented on Aug 10, 2021 on Aug 10, 2021" [level=3] [ref=e840]:
+                        - text: rfc805 commented
+                        - generic "Aug 10, 2021, 3:16 AM GMT+8" [ref=e841]: on Aug 10, 2021 on Aug 10, 2021
+                      - generic [ref=e842]:
+                        - link "rfc805" [ref=e844] [cursor=pointer]:
+                          - /url: /rfc805
+                        - link "on Aug 10, 2021on Aug 10, 2021" [ref=e847] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-895475341
+                          - generic "Aug 10, 2021, 3:16 AM GMT+8" [ref=e848]: on Aug 10, 2021on Aug 10, 2021
+                      - button "Actions for rfc805's comment, 3:16 AM on August 10, 2021" [ref=e852] [cursor=pointer]:
+                        - img [ref=e853]
+                    - generic [ref=e855]:
+                      - paragraph [ref=e858]: I don't see it here or in the documentation, but how do you turn this behavior off entirely? It's incredibly annoying for people who don't want to have mouse interactions pass through. Holding shift is not a good option.
+                      - toolbar "Reactions"
+                - generic [ref=e859]:
+                  - link "@zadjii-msft's profile" [ref=e860] [cursor=pointer]:
+                    - /url: https://github.com/zadjii-msft
+                    - img "zadjii-msft" [ref=e861]
+                  - generic [ref=e868]:
+                    - generic [ref=e870]:
+                      - heading "zadjii-msft commented on Aug 10, 2021 on Aug 10, 2021" [level=3] [ref=e871]:
+                        - text: zadjii-msft commented
+                        - generic "Aug 10, 2021, 3:27 AM GMT+8" [ref=e872]: on Aug 10, 2021 on Aug 10, 2021
+                      - generic [ref=e873]:
+                        - link "zadjii-msft" [ref=e875] [cursor=pointer]:
+                          - /url: /zadjii-msft
+                        - link "on Aug 10, 2021on Aug 10, 2021" [ref=e878] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-895482117
+                          - generic "Aug 10, 2021, 3:27 AM GMT+8" [ref=e879]: on Aug 10, 2021on Aug 10, 2021
+                      - generic [ref=e881]:
+                        - generic "This user is a member of the microsoft organization." [ref=e883]: Member
+                        - button "Actions for zadjii-msft's comment, 3:27 AM on August 10, 2021" [ref=e885] [cursor=pointer]:
+                          - img [ref=e886]
+                    - generic [ref=e888]:
+                      - paragraph [ref=e891]:
+                        - link "@rfc805" [ref=e892] [cursor=pointer]:
+                          - /url: https://github.com/rfc805
+                        - text: there isn't a setting to disable this entirely - I'm not sure I've heard anyone request that before. Typically this is something that's controlled per-client application on other platforms, within the app's own config. Is there some app (
+                        - code [ref=e893]: vim
+                        - text: ","
+                        - code [ref=e894]: tmux
+                        - text: ", etc) in particular that's requesting mouse mode that you can't disable mouse input for?"
+                      - toolbar "Reactions"
+                - generic [ref=e895]:
+                  - link "@rfc805's profile" [ref=e896] [cursor=pointer]:
+                    - /url: https://github.com/rfc805
+                    - img "rfc805" [ref=e897]
+                  - generic [ref=e904]:
+                    - generic [ref=e906]:
+                      - heading "rfc805 commented on Aug 10, 2021 on Aug 10, 2021" [level=3] [ref=e907]:
+                        - text: rfc805 commented
+                        - generic "Aug 10, 2021, 3:30 AM GMT+8" [ref=e908]: on Aug 10, 2021 on Aug 10, 2021
+                      - generic [ref=e909]:
+                        - link "rfc805" [ref=e911] [cursor=pointer]:
+                          - /url: /rfc805
+                        - link "on Aug 10, 2021on Aug 10, 2021" [ref=e914] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-895483887
+                          - generic "Aug 10, 2021, 3:30 AM GMT+8" [ref=e915]: on Aug 10, 2021on Aug 10, 2021
+                      - button "Actions for rfc805's comment, 3:30 AM on August 10, 2021" [ref=e919] [cursor=pointer]:
+                        - img [ref=e920]
+                    - generic [ref=e922]:
+                      - paragraph [ref=e925]: It's mostly vim (over ssh) but on a large variety of hosts which aren't related, which makes it non-trivial to globally disable in unlinked/unshared profiles across a few hundred different remote hosts. A lot of it involves copying data from those hosts across each other, or to other Windows apps, etc - so I find myself holding shift down my whole life if I use terminal instead of putty/mintty.
+                      - toolbar "Reactions"
+                - generic [ref=e926]:
+                  - link "@zadjii-msft's profile" [ref=e927] [cursor=pointer]:
+                    - /url: https://github.com/zadjii-msft
+                    - img "zadjii-msft" [ref=e928]
+                  - generic [ref=e935]:
+                    - generic [ref=e937]:
+                      - heading "zadjii-msft commented on Aug 10, 2021 on Aug 10, 2021" [level=3] [ref=e938]:
+                        - text: zadjii-msft commented
+                        - generic "Aug 10, 2021, 3:39 AM GMT+8" [ref=e939]: on Aug 10, 2021 on Aug 10, 2021
+                      - generic [ref=e940]:
+                        - link "zadjii-msft" [ref=e942] [cursor=pointer]:
+                          - /url: /zadjii-msft
+                        - link "on Aug 10, 2021on Aug 10, 2021" [ref=e945] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-895488865
+                          - generic "Aug 10, 2021, 3:39 AM GMT+8" [ref=e946]: on Aug 10, 2021on Aug 10, 2021
+                      - generic [ref=e948]:
+                        - generic "This user is a member of the microsoft organization." [ref=e950]: Member
+                        - button "Actions for zadjii-msft's comment, 3:39 AM on August 10, 2021" [ref=e952] [cursor=pointer]:
+                          - img [ref=e953]
+                    - generic [ref=e955]:
+                      - paragraph [ref=e958]:
+                        - text: You know, this actually already
+                        - emphasis [ref=e959]: is
+                        - text: on the backlog. I'd go upvote
+                        - link "#4875" [ref=e960] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/4875
+                        - generic [ref=e961]: ☺️
+                      - toolbar "Reactions"
+                - generic [ref=e962]:
+                  - link "@paukul's profile" [ref=e963] [cursor=pointer]:
+                    - /url: https://github.com/paukul
+                    - img "paukul" [ref=e964]
+                  - generic [ref=e971]:
+                    - generic [ref=e973]:
+                      - heading "paukul commented on Aug 10, 2021 on Aug 10, 2021" [level=3] [ref=e974]:
+                        - text: paukul commented
+                        - generic "Aug 10, 2021, 3:40 AM GMT+8" [ref=e975]: on Aug 10, 2021 on Aug 10, 2021
+                      - generic [ref=e976]:
+                        - link "paukul" [ref=e978] [cursor=pointer]:
+                          - /url: /paukul
+                        - link "on Aug 10, 2021on Aug 10, 2021" [ref=e981] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-895489321
+                          - generic "Aug 10, 2021, 3:40 AM GMT+8" [ref=e982]: on Aug 10, 2021on Aug 10, 2021
+                      - button "Actions for paukul's comment, 3:40 AM on August 10, 2021" [ref=e986] [cursor=pointer]:
+                        - img [ref=e987]
+                    - generic [ref=e989]:
+                      - paragraph [ref=e992]:
+                        - link "@rfc805" [ref=e993] [cursor=pointer]:
+                          - /url: https://github.com/rfc805
+                        - code [ref=e994]: :set mouse-=a
+                        - text: in vim will disable the mouse support for vim and should work around your issue until
+                        - link "#4875" [ref=e995] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/4875
+                        - text: is merged
+                      - toolbar "Reactions"
+                - generic [ref=e996]:
+                  - link "@rfc805's profile" [ref=e997] [cursor=pointer]:
+                    - /url: https://github.com/rfc805
+                    - img "rfc805" [ref=e998]
+                  - generic [ref=e1005]:
+                    - generic [ref=e1007]:
+                      - heading "rfc805 commented on Aug 10, 2021 on Aug 10, 2021" [level=3] [ref=e1008]:
+                        - text: rfc805 commented
+                        - generic "Aug 10, 2021, 3:44 AM GMT+8" [ref=e1009]: on Aug 10, 2021 on Aug 10, 2021
+                      - generic [ref=e1010]:
+                        - link "rfc805" [ref=e1012] [cursor=pointer]:
+                          - /url: /rfc805
+                        - link "on Aug 10, 2021on Aug 10, 2021" [ref=e1015] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#issuecomment-895491651
+                          - generic "Aug 10, 2021, 3:44 AM GMT+8" [ref=e1016]: on Aug 10, 2021on Aug 10, 2021
+                      - button "Actions for rfc805's comment, 3:44 AM on August 10, 2021" [ref=e1020] [cursor=pointer]:
+                        - img [ref=e1021]
+                    - generic [ref=e1023]:
+                      - paragraph [ref=e1026]: Thanks - I do know how to do it each time, just overall a productivity killer if you work in a large environment with a profile you do not control.
+                      - toolbar "Reactions"
+                - region "Events" [ref=e1027]:
+                  - generic [ref=e1034]:
+                    - img [ref=e1038]
+                    - generic [ref=e1040]:
+                      - generic [ref=e1042]:
+                        - link "lrstanley" [ref=e1044] [cursor=pointer]:
+                          - /url: /lrstanley
+                          - generic [ref=e1045]: lrstanley
+                        - text: mentioned this
+                        - link "on Jul 1, 2022on Jul 1, 2022" [ref=e1046] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#event-1197162013
+                          - generic "Jul 1, 2022, 12:57 PM GMT+8" [ref=e1047]: on Jul 1, 2022on Jul 1, 2022
+                      - region "Issues mentioned" [ref=e1050]:
+                        - list [ref=e1051]:
+                          - listitem [ref=e1052]:
+                            - generic [ref=e1053]:
+                              - img "Completed" [ref=e1054]
+                              - 'link "bug: windows missing mouse events past column 95 charmbracelet/bubbletea#359" [ref=e1057] [cursor=pointer]':
+                                - /url: https://github.com/charmbracelet/bubbletea/issues/359
+                                - text: "bug: windows missing mouse events past column 95"
+                                - generic [ref=e1058]: charmbracelet/bubbletea#359
+                  - generic [ref=e1062]:
+                    - img [ref=e1066]
+                    - generic [ref=e1068]:
+                      - generic [ref=e1070]:
+                        - link "jhmaster2000" [ref=e1072] [cursor=pointer]:
+                          - /url: /jhmaster2000
+                          - generic [ref=e1073]: jhmaster2000
+                        - text: mentioned this
+                        - link "on Sep 17, 2023on Sep 17, 2023" [ref=e1074] [cursor=pointer]:
+                          - /url: https://github.com/microsoft/terminal/issues/545#event-1316171764
+                          - generic "Sep 17, 2023, 5:48 PM GMT+8" [ref=e1075]: on Sep 17, 2023on Sep 17, 2023
+                      - region "Issues mentioned" [ref=e1078]:
+                        - list [ref=e1079]:
+                          - listitem [ref=e1080]:
+                            - generic [ref=e1081]:
+                              - img "Completed" [ref=e1082]
+                              - 'link "VT/xterm mouse reporting not working at all outside of WSL #15977" [ref=e1085] [cursor=pointer]':
+                                - /url: https://github.com/microsoft/terminal/issues/15977
+                                - text: VT/xterm mouse reporting not working at all outside of WSL
+                                - generic [ref=e1086]: "#15977"
+            - generic [ref=e1087]:
+              - link "Sign up for free" [ref=e1088] [cursor=pointer]:
+                - /url: /signup?return_to=https://github.com/microsoft/terminal/issues/545
+                - generic [ref=e1090]: Sign up for free
+              - generic [ref=e1091]:
+                - strong [ref=e1092]: to join this conversation on GitHub.
+                - text: Already have an account?
+              - link "Sign in to comment" [ref=e1093] [cursor=pointer]:
+                - /url: /login?return_to=https://github.com/microsoft/terminal/issues/545
+        - generic [ref=e1095]:
+          - heading "Metadata" [level=2] [ref=e1096]
+          - generic [ref=e1098]:
+            - generic [ref=e1099]:
+              - generic [ref=e1101]:
+                - heading "Assignees" [level=3]
+              - list [ref=e1103]:
+                - listitem [ref=e1104]:
+                  - link "carlos-zamora" [ref=e1105] [cursor=pointer]:
+                    - /url: /carlos-zamora
+                    - generic:
+                      - img "@carlos-zamora"
+                    - generic [ref=e1108]: carlos-zamora
+            - generic [ref=e1109]:
+              - generic [ref=e1111]:
+                - heading "Labels" [level=3]
+              - generic [ref=e1113]:
+                - link "Area-Input Related to input processing (key presses, mouse, etc.)" [ref=e1114] [cursor=pointer]:
+                  - /url: https://github.com/microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Area-Input%22
+                  - generic [ref=e1116]: Area-Input
+                  - generic [ref=e1117]: Related to input processing (key presses, mouse, etc.)
+                - link "Area-VT Virtual Terminal sequence support" [ref=e1118] [cursor=pointer]:
+                  - /url: https://github.com/microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Area-VT%22
+                  - generic [ref=e1120]: Area-VT
+                  - generic [ref=e1121]: Virtual Terminal sequence support
+                - link "Issue-Feature Complex enough to require an in depth planning process and actual budgeted, scheduled work." [ref=e1122] [cursor=pointer]:
+                  - /url: https://github.com/microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Issue-Feature%22
+                  - generic [ref=e1124]: Issue-Feature
+                  - generic [ref=e1125]: Complex enough to require an in depth planning process and actual budgeted, scheduled work.
+                - link "Product-Terminal The new Windows Terminal." [ref=e1126] [cursor=pointer]:
+                  - /url: https://github.com/microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Product-Terminal%22
+                  - generic [ref=e1128]: Product-Terminal
+                  - generic [ref=e1129]: The new Windows Terminal.
+                - link "Resolution-Fix-Committed Fix is checked in, but it might be 3-4 weeks until a release." [ref=e1130] [cursor=pointer]:
+                  - /url: https://github.com/microsoft/terminal/issues?q=state%3Aopen%20label%3A%22Resolution-Fix-Committed%22
+                  - generic [ref=e1132]: Resolution-Fix-Committed
+                  - generic [ref=e1133]: Fix is checked in, but it might be 3-4 weeks until a release.
+            - generic [ref=e1135]:
+              - generic [ref=e1136]:
+                - heading "Type" [level=3]
+              - generic [ref=e1137]: No type
+            - generic [ref=e1139]:
+              - generic [ref=e1140]:
+                - heading "Projects" [level=3]
+              - generic [ref=e1141]: No projects
+            - generic [ref=e1142]:
+              - generic [ref=e1144]:
+                - heading "Milestone" [level=3]
+              - list [ref=e1146]:
+                - listitem [ref=e1147]:
+                  - link "Terminal v1.0" [ref=e1148] [cursor=pointer]:
+                    - /url: https://github.com/microsoft/terminal/milestone/6
+                    - generic [ref=e1150]:
+                      - generic [ref=e1151]: Terminal v1.0
+                      - generic [ref=e1153]: Closed Jun 11, 2020on Jun 11, 2020, 100% complete
+            - generic [ref=e1155]:
+              - generic [ref=e1156]:
+                - heading "Relationships" [level=3]
+              - generic [ref=e1157]: None yet
+            - generic [ref=e1158]:
+              - generic [ref=e1160]:
+                - heading "Development" [level=3]
+              - list [ref=e1162]:
+                - listitem [ref=e1163]:
+                  - link "Merged Synthesize VT mouse events and add mouse support to Terminal microsoft/terminal" [ref=e1164] [cursor=pointer]:
+                    - /url: https://github.com/microsoft/terminal/pull/4859
+                    - img "Merged" [ref=e1166]
+                    - generic [ref=e1168]:
+                      - generic [ref=e1169]: Synthesize VT mouse events and add mouse support to Terminal
+                      - generic [ref=e1170]: microsoft/terminal
+                  - link "Release v1.0.1401.0" [ref=e1171] [cursor=pointer]:
+                    - /url: https://github.com/microsoft/terminal/releases/tag/v1.0.1401.0
+                    - generic [ref=e1172]: Release
+                    - img [ref=e1173]
+                    - generic [ref=e1175]: v1.0.1401.0
+            - generic [ref=e1176]:
+              - generic [ref=e1178]:
+                - heading "Participants" [level=3]
+              - generic [ref=e1180]:
+                - generic [ref=e1181]:
+                  - link "@paukul" [ref=e1182] [cursor=pointer]:
+                    - /url: /paukul
+                    - img "@paukul" [ref=e1183]
+                  - link "@giggio" [ref=e1184] [cursor=pointer]:
+                    - /url: /giggio
+                    - img "@giggio" [ref=e1185]
+                  - link "@cerebrate" [ref=e1186] [cursor=pointer]:
+                    - /url: /cerebrate
+                    - img "@cerebrate" [ref=e1187]
+                  - link "@rcarmo" [ref=e1188] [cursor=pointer]:
+                    - /url: /rcarmo
+                    - img "@rcarmo" [ref=e1189]
+                  - link "@kumarharsh" [ref=e1190] [cursor=pointer]:
+                    - /url: /kumarharsh
+                    - img "@kumarharsh" [ref=e1191]
+                - button "and 17 other participants, click to see the full list" [ref=e1192] [cursor=pointer]:
+                  - generic [ref=e1194]: "+17"
+            - heading "Issue actions" [level=2] [ref=e1195]
+            - list
+  - contentinfo [ref=e1196]:
+    - heading "Footer" [level=2] [ref=e1197]
+    - generic [ref=e1198]:
+      - generic [ref=e1199]:
+        - link "GitHub Homepage" [ref=e1200] [cursor=pointer]:
+          - /url: https://github.com
+          - img [ref=e1201]
+        - generic [ref=e1203]: © 2026 GitHub, Inc.
+      - navigation "Footer" [ref=e1204]:
+        - heading "Footer navigation" [level=3] [ref=e1205]
+        - list "Footer navigation" [ref=e1206]:
+          - listitem [ref=e1207]:
+            - link "Terms" [ref=e1208] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/github-terms/github-terms-of-service
+          - listitem [ref=e1209]:
+            - link "Privacy" [ref=e1210] [cursor=pointer]:
+              - /url: https://docs.github.com/site-policy/privacy-policies/github-privacy-statement
+          - listitem [ref=e1211]:
+            - link "Security" [ref=e1212] [cursor=pointer]:
+              - /url: https://github.com/security
+          - listitem [ref=e1213]:
+            - link "Status" [ref=e1214] [cursor=pointer]:
+              - /url: https://www.githubstatus.com/
+          - listitem [ref=e1215]:
+            - link "Community" [ref=e1216] [cursor=pointer]:
+              - /url: https://github.community/
+          - listitem [ref=e1217]:
+            - link "Docs" [ref=e1218] [cursor=pointer]:
+              - /url: https://docs.github.com/
+          - listitem [ref=e1219]:
+            - link "Contact" [ref=e1220] [cursor=pointer]:
+              - /url: https://support.github.com?tags=dotcom-footer
+          - listitem [ref=e1221]:
+            - button "Manage cookies" [ref=e1223] [cursor=pointer]
+          - listitem [ref=e1224]:
+            - button "Do not share my personal information" [ref=e1226] [cursor=pointer]
