@@ -131,6 +131,10 @@ export interface UseXtermOptions {
   onMerge?: () => void;
   canMerge?: boolean;
   preserveScreenOnClear?: boolean;
+  /** Convert wheel events to Up/Down arrow key sequences sent to the PTY.
+   *  Used for TUI apps (e.g. DeepSeek-TUI) that use alternate screen buffer
+   *  and handle scrolling internally via arrow keys when the composer is empty. */
+  wheelAsArrow?: boolean;
 }
 
 export interface UseXtermResult {
@@ -210,6 +214,7 @@ export function useXterm({
   onMerge,
   canMerge = false,
   preserveScreenOnClear = false,
+  wheelAsArrow = false,
 }: UseXtermOptions): UseXtermResult {
   const containerRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -250,6 +255,8 @@ export function useXterm({
   canMergeRef.current = canMerge;
   const preserveScreenOnClearRef = useRef(preserveScreenOnClear);
   preserveScreenOnClearRef.current = preserveScreenOnClear;
+  const wheelAsArrowRef = useRef(wheelAsArrow);
+  wheelAsArrowRef.current = wheelAsArrow;
   const copyOnSelectionRef = useRef(copyOnSelection);
   copyOnSelectionRef.current = copyOnSelection;
   const hasBeenActivatedRef = useRef(false);
@@ -542,11 +549,32 @@ export function useXterm({
     copyOnSelectionHandlerRef.current = handleCopyOnSelection;
 
     const handleWheelScrollback = (event: WheelEvent) => {
-      if (!preserveScreenOnClearRef.current) return;
-      if (!terminalRef.current) return;
+      if (preserveScreenOnClearRef.current) {
+        if (!terminalRef.current) return;
 
-      const buffer = terminal.buffer.active;
-      if (buffer.baseY <= 0) return;
+        const buffer = terminal.buffer.active;
+        if (buffer.baseY <= 0) return;
+
+        const lineDelta =
+          event.deltaMode === WheelEvent.DOM_DELTA_LINE
+            ? event.deltaY
+            : event.deltaY / WHEEL_PIXELS_PER_LINE;
+        wheelLineDeltaRef.current += lineDelta;
+        const lines = Math.trunc(wheelLineDeltaRef.current);
+        if (lines === 0) return;
+        wheelLineDeltaRef.current -= lines;
+
+        event.preventDefault();
+        event.stopPropagation();
+        terminal.scrollLines(lines);
+        return;
+      }
+
+      // wheelAsArrow mode: convert wheel events to Up/Down arrow key sequences.
+      // Used for TUI apps (e.g. DeepSeek) that use alternate screen buffer and
+      // handle scrolling internally via arrow keys when the composer is empty.
+      if (!wheelAsArrowRef.current) return;
+      if (!ptyIdRef.current) return;
 
       const lineDelta =
         event.deltaMode === WheelEvent.DOM_DELTA_LINE
@@ -559,7 +587,13 @@ export function useXterm({
 
       event.preventDefault();
       event.stopPropagation();
-      terminal.scrollLines(lines);
+
+      // Each arrow key scrolls 3 lines in DeepSeek-TUI (COMPOSER_ARROW_SCROLL_LINES).
+      // Send 1-3 arrow sequences per wheel tick to balance smoothness and rendering load.
+      const absLines = Math.min(Math.abs(lines), 3);
+      const seq = lines < 0 ? '\x1b[A' : '\x1b[B';
+      const data = seq.repeat(absLines);
+      window.electronAPI.terminal.write(ptyIdRef.current, data);
     };
     terminal.element?.addEventListener('wheel', handleWheelScrollback, {
       capture: true,

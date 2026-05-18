@@ -77,8 +77,12 @@ export function registerGitHandlers(): void {
   );
 
   ipcMain.handle(IPC_CHANNELS.GIT_BRANCH_LIST, async (_, workdir: string) => {
-    const git = getGitService(workdir);
-    return git.getBranches();
+    try {
+      const git = getGitService(workdir);
+      return git.getBranches();
+    } catch {
+      return [];
+    }
   });
 
   ipcMain.handle(

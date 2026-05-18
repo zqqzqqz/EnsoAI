@@ -1,7 +1,7 @@
 import type { ChildProcess } from 'node:child_process';
 import type { CommonAICLIOptions } from '@shared/types/ai';
 import { spawnGit } from '../git/runtime';
-import { spawnCLI, stripAnsi } from './providers';
+import { parseDeepSeekStreamOutput, spawnCLI, stripAnsi } from './providers';
 
 export interface CodeReviewOptions extends CommonAICLIOptions {
   workdir: string;
@@ -329,7 +329,7 @@ export async function startCodeReview(options: CodeReviewOptions): Promise<void>
 
   const prompt = buildPrompt(gitDiff, gitLog, language, customPrompt);
 
-  // Use stream-json for Claude, Cursor, and Gemini; json for Codex (doesn't support streaming well)
+  // Use stream-json for Claude, Cursor, Gemini, and DeepSeek; json for Codex (doesn't support streaming well)
   const outputFormat = provider === 'codex-cli' ? 'json' : 'stream-json';
 
   const { proc, kill } = spawnCLI({
@@ -369,6 +369,21 @@ export async function startCodeReview(options: CodeReviewOptions): Promise<void>
       for (const chunk of chunks) {
         onChunk(chunk);
       }
+    } else if (provider === 'deepseek-cli') {
+      // DeepSeek stream-json: each line is {"type":"content","content":"..."}
+      const lines = cleaned.split('\n');
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (!trimmed.startsWith('{')) continue;
+        try {
+          const event = JSON.parse(trimmed);
+          if (event.type === 'content' && event.content) {
+            onChunk(event.content);
+          }
+        } catch {
+          // Skip unparseable lines
+        }
+      }
     }
   });
 
@@ -389,11 +404,16 @@ export async function startCodeReview(options: CodeReviewOptions): Promise<void>
       return;
     }
 
-    // For Codex, parse the full output at the end
+    // For Codex and DeepSeek, parse the full output at the end
     if (provider === 'codex-cli') {
       const result = parseCodexOutput(fullOutput);
       if (result) {
         onChunk(result);
+      }
+    } else if (provider === 'deepseek-cli') {
+      const result = parseDeepSeekStreamOutput(fullOutput);
+      if (result.text) {
+        onChunk(result.text);
       }
     }
 

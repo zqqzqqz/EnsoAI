@@ -156,7 +156,13 @@ export function AgentTerminal({
   const terminalSessionId = id ?? sessionId;
   const resumeSessionId = sessionId ?? id;
   const isWindows = window.electronAPI?.env?.platform === 'win32';
-  const shouldPreserveCodexScrollback = isWindows && isCodexAgent(agentId, agentCommand);
+  // Only enable scrollback preservation for Codex (its TUI pattern is compatible).
+  // DeepSeek uses ratatui which does full-screen repaints incompatible with this mechanism -
+  // it causes overlapping content, stuttering, and breaks DeepSeek's built-in TUI scrolling.
+  const shouldPreserveScrollback = isWindows && isCodexAgent(agentId, agentCommand);
+  // DeepSeek on Windows: ConPTY doesn't forward VT mouse sequences, so wheel events are
+  // converted to Up/Down arrow keys that DeepSeek-TUI interprets as transcript scroll.
+  const shouldWheelAsArrow = isWindows && agentCommand?.startsWith('deepseek');
 
   // Use external control if provided, otherwise use local state.
   // IMPORTANT: `externalEnhancedInputOpen` can be false, so we must check `undefined` rather than truthiness.
@@ -366,6 +372,11 @@ export function AgentTerminal({
     if (isWindows && isCodexAgent(agentId, agentCommand) && !hasCodexAltScreenFlag(customArgs)) {
       agentArgs.unshift('--no-alt-screen');
     }
+
+    // DeepSeek: DO NOT add --mouse-capture. ConPTY on Windows does not forward VT mouse
+    // sequences to native apps, so mouse capture would be ineffective. Instead, the wheel
+    // event handler in useXterm converts wheel events to Up/Down arrow key sequences,
+    // which DeepSeek-TUI interprets as transcript scroll when the composer is empty.
 
     // Hapi environment: run through hapi (global) or npx @twsxtd/hapi with CLI_API_TOKEN
     if (environment === 'hapi') {
@@ -768,7 +779,8 @@ export function AgentTerminal({
     onSplit,
     onMerge,
     canMerge,
-    preserveScreenOnClear: shouldPreserveCodexScrollback,
+    preserveScreenOnClear: shouldPreserveScrollback,
+    wheelAsArrow: shouldWheelAsArrow,
   });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchBarRef = useRef<TerminalSearchBarRef>(null);

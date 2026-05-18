@@ -5,6 +5,7 @@ import type {
   ClaudeModelId,
   CodexModelId,
   CursorModelId,
+  DeepSeekModelId,
   GeminiModelId,
 } from '@shared/types';
 import type { CommonAICLIOptions } from '@shared/types/ai';
@@ -125,6 +126,27 @@ function buildCursorArgs(options: CLISpawnOptions): string[] {
   return args;
 }
 
+/**
+ * Build args for DeepSeek CLI (deepseek exec).
+ * Uses 'exec' subcommand with --output-format stream-json and --auto for non-interactive mode.
+ */
+function buildDeepSeekArgs(options: CLISpawnOptions): string[] {
+  const args = [
+    'exec',
+    '--output-format',
+    options.outputFormat === 'json' ? 'stream-json' : (options.outputFormat ?? 'stream-json'),
+    '--model',
+    options.model as DeepSeekModelId,
+    '--auto',
+  ];
+
+  if (options.sessionId) {
+    args.push('--resume', options.sessionId);
+  }
+
+  return args;
+}
+
 export function spawnCLI(options: CLISpawnOptions): CLISpawnResult {
   const { shell, args: shellArgs } = getShellForCommand();
   const env = getEnvForCommand();
@@ -148,6 +170,10 @@ export function spawnCLI(options: CLISpawnOptions): CLISpawnResult {
     case 'cursor-cli':
       cliCommand = 'agent';
       cliArgs = buildCursorArgs(options);
+      break;
+    case 'deepseek-cli':
+      cliCommand = 'deepseek';
+      cliArgs = buildDeepSeekArgs(options);
       break;
     default:
       cliCommand = 'claude';
@@ -341,6 +367,47 @@ export function parseGeminiJsonOutput(stdout: string): ParsedCLIResult {
   }
 }
 
+/**
+ * Parse DeepSeek stream-json output.
+ * Each line is a JSON object with a "type" field:
+ *   {"type":"content","content":"..."} - text content
+ *   {"type":"metadata","meta":{...}} - model/tokens info
+ *   {"type":"done"} - turn complete
+ *   {"type":"error","error":"..."} - error
+ */
+export function parseDeepSeekStreamOutput(stdout: string): ParsedCLIResult {
+  const cleaned = stripAnsi(stdout).trim();
+  if (!cleaned) {
+    return { success: false, error: 'Empty response' };
+  }
+
+  const contents: string[] = [];
+  const lines = cleaned.split('\n');
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed.startsWith('{')) continue;
+    try {
+      const event = JSON.parse(trimmed);
+      if (event.type === 'content' && event.content) {
+        contents.push(event.content);
+      } else if (event.type === 'error' && event.error) {
+        return { success: false, error: event.error };
+      }
+      // "metadata" and "done" events are informational, skip
+    } catch {
+      // Skip unparseable lines
+    }
+  }
+
+  if (contents.length > 0) {
+    return { success: true, text: contents.join('') };
+  }
+
+  // Fallback: treat as plain text if no structured content found
+  return { success: true, text: cleaned };
+}
+
 export function parseCLIOutput(provider: AIProvider, stdout: string): ParsedCLIResult {
   switch (provider) {
     case 'claude-code':
@@ -351,6 +418,8 @@ export function parseCLIOutput(provider: AIProvider, stdout: string): ParsedCLIR
       return parseCursorOutput(stdout);
     case 'gemini-cli':
       return parseGeminiJsonOutput(stdout);
+    case 'deepseek-cli':
+      return parseDeepSeekStreamOutput(stdout);
     default:
       return parseClaudeJsonOutput(stdout);
   }

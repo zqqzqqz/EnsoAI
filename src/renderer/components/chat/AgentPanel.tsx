@@ -544,6 +544,7 @@ export function AgentPanel({ repoPath, cwd, isActive = false, onSwitchWorktree }
       'codex-cli': 'codex',
       'cursor-cli': 'cursor',
       'gemini-cli': 'gemini',
+      'deepseek-cli': 'deepseek',
     };
     return pendingContinueProvider != null ? (map[pendingContinueProvider] ?? 'claude') : 'claude';
   }, [pendingContinueProvider]);

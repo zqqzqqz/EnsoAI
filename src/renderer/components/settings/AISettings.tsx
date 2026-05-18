@@ -30,6 +30,7 @@ const PROVIDERS: { value: AIProvider; label: string }[] = [
   { value: 'codex-cli', label: 'Codex CLI' },
   { value: 'cursor-cli', label: 'Cursor CLI' },
   { value: 'gemini-cli', label: 'Gemini CLI' },
+  { value: 'deepseek-cli', label: 'DeepSeek CLI' },
 ];
 
 // Model options per provider
@@ -53,6 +54,10 @@ const MODELS_BY_PROVIDER: Record<AIProvider, { value: string; label: string }[]>
   'gemini-cli': [
     { value: 'gemini-3-pro-preview', label: 'Gemini 3 Pro Preview' },
     { value: 'gemini-3-flash-preview', label: 'Gemini 3 Flash Preview' },
+  ],
+  'deepseek-cli': [
+    { value: 'deepseek-v4-pro', label: 'DeepSeek V4 Pro' },
+    { value: 'deepseek-v4-flash', label: 'DeepSeek V4 Flash' },
   ],
 };
 

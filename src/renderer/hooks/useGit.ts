@@ -36,11 +36,17 @@ export function useGitBranches(workdir: string | null) {
     queryKey: ['git', 'branches', normalizedWorkdir],
     queryFn: async () => {
       if (!workdir) return [];
-      const branches = await window.electronAPI.git.getBranches(workdir);
-      setBranches(branches);
-      return branches;
+      try {
+        const branches = await window.electronAPI.git.getBranches(workdir);
+        setBranches(branches);
+        return branches;
+      } catch {
+        setBranches([]);
+        return [];
+      }
     },
     enabled: !!workdir,
+    retry: false,
   });
 }
 
