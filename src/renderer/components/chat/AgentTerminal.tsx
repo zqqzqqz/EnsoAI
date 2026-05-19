@@ -367,6 +367,7 @@ export function AgentTerminal({
       }
     }
 
+    const isWindows = window.electronAPI?.env?.platform === 'win32';
     let envVars: Record<string, string> | undefined;
 
     if (isWindows && isCodexAgent(agentId, agentCommand) && !hasCodexAltScreenFlag(customArgs)) {
@@ -479,7 +480,6 @@ export function AgentTerminal({
     };
   }, [
     agentCommand,
-    agentId,
     customPath,
     customArgs,
     initialPrompt,
@@ -491,7 +491,7 @@ export function AgentTerminal({
     resolvedShell,
     claudeCodeIntegration.tmuxEnabled,
     terminalSessionId,
-    isWindows,
+    agentId,
   ]);
 
   // Handle exit with auto-close logic
