@@ -680,8 +680,12 @@ export function FilePanel({ rootPath, isActive = false }: FilePanelProps) {
   // Handle rename
   const handleRename = useCallback(
     async (path: string, newName: string) => {
-      const parentPath = path.substring(0, path.lastIndexOf('/'));
-      const newPath = `${parentPath}/${newName}`;
+      const sepIdx = Math.max(path.lastIndexOf('/'), path.lastIndexOf('\\'));
+      if (sepIdx < 0) return;
+      const sep = path[sepIdx];
+      const parentPath = path.substring(0, sepIdx);
+      const newPath = `${parentPath}${sep}${newName}`;
+      if (newPath === path) return;
       await renameItem(path, newPath);
     },
     [renameItem]
