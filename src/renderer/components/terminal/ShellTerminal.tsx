@@ -16,6 +16,7 @@ interface ShellTerminalProps {
   onInit?: (ptyId: string) => void;
   onSplit?: () => void;
   onMerge?: () => void;
+  sshHostId?: string;
 }
 
 export function ShellTerminal({
@@ -28,6 +29,7 @@ export function ShellTerminal({
   onInit,
   onSplit,
   onMerge,
+  sshHostId,
 }: ShellTerminalProps) {
   const { t } = useI18n();
 
@@ -63,6 +65,7 @@ export function ShellTerminal({
     onMerge,
     canMerge,
     onCustomKey: handleCustomKey,
+    sshHostId,
   });
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const searchBarRef = useRef<TerminalSearchBarRef>(null);

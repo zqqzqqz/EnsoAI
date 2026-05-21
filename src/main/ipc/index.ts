@@ -36,6 +36,8 @@ import { registerNotificationHandlers } from './notification';
 import { registerSearchHandlers } from './search';
 import { registerSettingsHandlers } from './settings';
 import { registerShellHandlers } from './shell';
+import { cleanupSsh, cleanupSshSync, registerSshHandlers } from './ssh';
+import { destroyAllSshPtys, registerSshTerminalHandlers } from './sshTerminal';
 import { registerTempWorkspaceHandlers } from './tempWorkspace';
 import {
   destroyAllTerminals,
@@ -72,6 +74,8 @@ export function registerIpcHandlers(): void {
   registerTempWorkspaceHandlers();
   registerTmuxHandlers();
   registerTodoHandlers();
+  registerSshHandlers();
+  registerSshTerminalHandlers();
 }
 
 export async function cleanupAllResources(): Promise<void> {
@@ -115,6 +119,10 @@ export async function cleanupAllResources(): Promise<void> {
       safeRun(() => stopClaudeCompletionsWatchers(), 'claudeCompletions'),
       // Temp files
       safeRun(() => cleanupTempFiles(), 'tempFiles'),
+      // SSH connection pool (will be implemented in T-027)
+      safeRun(() => cleanupSsh(), 'ssh'),
+      // SSH PTY sessions
+      destroyAllSshPtys(),
     ]),
     deadline,
   ]);
@@ -184,6 +192,12 @@ export function cleanupAllResourcesSync(): void {
 
   // Clean up temp files (sync)
   cleanupTempFilesSync();
+
+  // SSH connection pool (will be wired in T-027)
+  cleanupSshSync();
+
+  // SSH PTY sessions
+  destroyAllSshPtys();
 
   console.log('[app] Sync cleanup done');
 }

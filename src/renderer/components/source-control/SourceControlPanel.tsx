@@ -1098,6 +1098,7 @@ export function SourceControlPanel({
                 isSyncing={isSyncing || pullMutation.isPending || pushMutation.isPending}
                 onSync={() => selectedRepoPath && handleSync(selectedRepoPath)}
                 onPublish={() => selectedRepoPath && handlePublish(selectedRepoPath)}
+                worktreePath={rootPath}
               />
             </div>
 

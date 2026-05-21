@@ -26,6 +26,8 @@ import type {
   GitStatus,
   GitSubmodule,
   GitWorktree,
+  HostKeyVerifyDecision,
+  HostKeyVerifyRequest,
   McpServer,
   McpServerConfig,
   MergeConflict,
@@ -34,8 +36,18 @@ import type {
   ProxySettings,
   PullRequest,
   RecentEditorProject,
+  RemoteHost,
+  RemoteHostCredentialMeta,
+  RemoteHostSaveInput,
+  SftpEntry,
+  SftpStat,
   ShellConfig,
   ShellInfo,
+  SshConnectionState,
+  SshTestConnectionResult,
+  SyncEstimateResult,
+  SyncProgress,
+  SyncQueueStatus,
   TempWorkspaceCheckResult,
   TempWorkspaceCreateResult,
   TempWorkspaceRemoveResult,
@@ -319,6 +331,8 @@ const electronAPI = {
   file: {
     read: (filePath: string): Promise<FileReadResult> =>
       ipcRenderer.invoke(IPC_CHANNELS.FILE_READ, filePath),
+    stat: (filePath: string): Promise<{ size: number } | null> =>
+      ipcRenderer.invoke(IPC_CHANNELS.FILE_STAT, filePath),
     write: (filePath: string, content: string, encoding?: string): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.FILE_WRITE, filePath, content, encoding),
     saveToTemp: (
@@ -406,6 +420,31 @@ const electronAPI = {
         callback(event);
       ipcRenderer.on(IPC_CHANNELS.TERMINAL_EXIT, handler);
       return () => ipcRenderer.off(IPC_CHANNELS.TERMINAL_EXIT, handler);
+    },
+  },
+
+  // SSH Terminal
+  sshTerminal: {
+    create: (
+      hostId: string,
+      options: { cols?: number; rows?: number; cwd?: string }
+    ): Promise<string> => ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_CREATE, hostId, options),
+    write: (id: string, data: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_WRITE, id, data),
+    resize: (id: string, size: { cols: number; rows: number }): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_RESIZE, id, size),
+    destroy: (id: string): Promise<void> =>
+      ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_DESTROY, id),
+    onData: (callback: (event: { id: string; data: string }) => void): (() => void) => {
+      const handler = (_: unknown, event: { id: string; data: string }) => callback(event);
+      ipcRenderer.on(IPC_CHANNELS.SSH_TERMINAL_DATA, handler);
+      return () => ipcRenderer.off(IPC_CHANNELS.SSH_TERMINAL_DATA, handler);
+    },
+    onExit: (callback: (event: { id: string; exitCode: number | null }) => void): (() => void) => {
+      const handler = (_: unknown, event: { id: string; exitCode: number | null }) =>
+        callback(event);
+      ipcRenderer.on(IPC_CHANNELS.SSH_TERMINAL_EXIT, handler);
+      return () => ipcRenderer.off(IPC_CHANNELS.SSH_TERMINAL_EXIT, handler);
     },
   },
 
@@ -1159,6 +1198,98 @@ const electronAPI = {
       ) => callback(status);
       ipcRenderer.on(IPC_CHANNELS.BORE_STATUS_CHANGED, handler);
       return () => ipcRenderer.off(IPC_CHANNELS.BORE_STATUS_CHANGED, handler);
+    },
+  },
+
+  // SSH Remote Development
+  ssh: {
+    host: {
+      list: (): Promise<RemoteHost[]> => ipcRenderer.invoke(IPC_CHANNELS.SSH_HOST_LIST),
+      save: (input: RemoteHostSaveInput): Promise<RemoteHost> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_HOST_SAVE, input),
+      delete: (hostId: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_HOST_DELETE, hostId),
+      test: (input: RemoteHostSaveInput): Promise<SshTestConnectionResult> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_HOST_TEST, input),
+      connect: (hostId: string): Promise<SshConnectionState> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_HOST_CONNECT, hostId),
+      disconnect: (hostId: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_HOST_DISCONNECT, hostId),
+      getCredentialMeta: (hostId: string): Promise<RemoteHostCredentialMeta> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_HOST_CREDENTIAL_META, hostId),
+      respondVerifyKey: (hostId: string, decision: HostKeyVerifyDecision): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_HOST_VERIFY_KEY_RESPONSE, hostId, decision),
+      onStatus: (callback: (state: SshConnectionState) => void): (() => void) => {
+        const handler = (_: unknown, state: SshConnectionState) => callback(state);
+        ipcRenderer.on(IPC_CHANNELS.SSH_HOST_STATUS, handler);
+        return () => ipcRenderer.off(IPC_CHANNELS.SSH_HOST_STATUS, handler);
+      },
+      onVerifyKeyRequest: (callback: (req: HostKeyVerifyRequest) => void): (() => void) => {
+        const handler = (_: unknown, req: HostKeyVerifyRequest) => callback(req);
+        ipcRenderer.on(IPC_CHANNELS.SSH_HOST_VERIFY_KEY_REQUEST, handler);
+        return () => ipcRenderer.off(IPC_CHANNELS.SSH_HOST_VERIFY_KEY_REQUEST, handler);
+      },
+    },
+    fs: {
+      readDir: (hostId: string, path: string): Promise<SftpEntry[]> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_FS_READ_DIR, hostId, path),
+      stat: (hostId: string, path: string): Promise<SftpStat> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_FS_STAT, hostId, path),
+      readFile: (hostId: string, path: string): Promise<string> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_FS_READ_FILE, hostId, path),
+    },
+    sync: {
+      estimate: (hostId: string, remotePath: string): Promise<SyncEstimateResult> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_ESTIMATE, hostId, remotePath),
+      mirror: (hostId: string, remotePath: string, localPath: string): Promise<{ jobId: string }> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_MIRROR, hostId, remotePath, localPath),
+      cancel: (jobId: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_CANCEL, jobId),
+      upload: (hostId: string, localPath: string, remotePath: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_UPLOAD, hostId, localPath, remotePath),
+      getQueueStatus: (hostId: string): Promise<SyncQueueStatus> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_QUEUE_STATUS, hostId),
+      onProgress: (callback: (progress: SyncProgress) => void): (() => void) => {
+        const handler = (_: unknown, progress: SyncProgress) => callback(progress);
+        ipcRenderer.on(IPC_CHANNELS.SSH_SYNC_PROGRESS, handler);
+        return () => ipcRenderer.off(IPC_CHANNELS.SSH_SYNC_PROGRESS, handler);
+      },
+      onQueueStatus: (callback: (status: SyncQueueStatus) => void): (() => void) => {
+        const handler = (_: unknown, status: SyncQueueStatus) => callback(status);
+        ipcRenderer.on(IPC_CHANNELS.SSH_SYNC_QUEUE_STATUS, handler);
+        return () => ipcRenderer.off(IPC_CHANNELS.SSH_SYNC_QUEUE_STATUS, handler);
+      },
+    },
+    terminal: {
+      create: (opts: {
+        hostId: string;
+        cwd?: string;
+        cols?: number;
+        rows?: number;
+      }): Promise<{ sessionId: string }> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_CREATE, opts),
+      write: (sessionId: string, data: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_WRITE, sessionId, data),
+      resize: (sessionId: string, cols: number, rows: number): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_RESIZE, sessionId, cols, rows),
+      close: (sessionId: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_CLOSE, sessionId),
+      onData: (callback: (payload: { sessionId: string; data: string }) => void): (() => void) => {
+        const handler = (_: unknown, payload: { sessionId: string; data: string }) =>
+          callback(payload);
+        ipcRenderer.on(IPC_CHANNELS.SSH_TERMINAL_DATA, handler);
+        return () => ipcRenderer.off(IPC_CHANNELS.SSH_TERMINAL_DATA, handler);
+      },
+      onExit: (
+        callback: (payload: { sessionId: string; code?: number; signal?: string }) => void
+      ): (() => void) => {
+        const handler = (
+          _: unknown,
+          payload: { sessionId: string; code?: number; signal?: string }
+        ) => callback(payload);
+        ipcRenderer.on(IPC_CHANNELS.SSH_TERMINAL_EXIT, handler);
+        return () => ipcRenderer.off(IPC_CHANNELS.SSH_TERMINAL_EXIT, handler);
+      },
     },
   },
 

@@ -24,6 +24,7 @@ export type {
 } from './remoteShare';
 export * from './search';
 export * from './shell';
+export * from './ssh';
 export * from './tempWorkspace';
 export * from './terminal';
 export * from './worktree';

@@ -1,6 +1,6 @@
 import type { Locale } from '@shared/i18n';
 import { normalizeLocale } from '@shared/i18n';
-import type { CustomAgent, McpServer, PromptPreset } from '@shared/types';
+import type { CustomAgent, McpServer, PromptPreset, RemoteHost } from '@shared/types';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import {
@@ -10,6 +10,8 @@ import {
 } from '@/lib/ghosttyTheme';
 import { updateRendererLogging } from '@/utils/logging';
 import {
+  DEFAULT_LARGE_FILE_THRESHOLD_BYTES,
+  DEFAULT_REMOTE_MIRROR_MAX_BYTES,
   defaultAgentSettings,
   defaultAiPerformanceSettings,
   defaultBranchNameGeneratorSettings,
@@ -165,6 +167,12 @@ function getInitialState() {
 
     // Git Clone Settings
     gitClone: defaultGitCloneSettings,
+
+    // SSH Remote Development
+    remoteHosts: [] as RemoteHost[],
+    remoteCacheRoot: undefined as string | undefined,
+    largeFileThresholdBytes: DEFAULT_LARGE_FILE_THRESHOLD_BYTES,
+    remoteMirrorMaxBytes: DEFAULT_REMOTE_MIRROR_MAX_BYTES,
 
     // Beta features
     todoEnabled: false,
@@ -545,6 +553,32 @@ export const useSettingsStore = create<SettingsState>()(
             ),
           },
         })),
+
+      // SSH Remote Development Setters
+      setRemoteHosts: (remoteHosts) => set({ remoteHosts }),
+      upsertRemoteHost: (host) =>
+        set((state) => {
+          const idx = state.remoteHosts.findIndex((h) => h.id === host.id);
+          if (idx === -1) {
+            return { remoteHosts: [...state.remoteHosts, host] };
+          }
+          const next = state.remoteHosts.slice();
+          next[idx] = host;
+          return { remoteHosts: next };
+        }),
+      removeRemoteHost: (hostId) =>
+        set((state) => ({
+          remoteHosts: state.remoteHosts.filter((h) => h.id !== hostId),
+        })),
+      setRemoteCacheRoot: (remoteCacheRoot) => set({ remoteCacheRoot }),
+      setLargeFileThresholdBytes: (largeFileThresholdBytes) => {
+        const safe = Math.max(1024, Math.floor(largeFileThresholdBytes));
+        set({ largeFileThresholdBytes: safe });
+      },
+      setRemoteMirrorMaxBytes: (remoteMirrorMaxBytes) => {
+        const safe = Math.max(1024 * 1024, Math.floor(remoteMirrorMaxBytes));
+        set({ remoteMirrorMaxBytes: safe });
+      },
 
       // Beta Feature Setters
       setTodoEnabled: (todoEnabled) => set({ todoEnabled }),

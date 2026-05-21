@@ -6,6 +6,7 @@ import type {
   McpServer,
   PromptPreset,
   ProxySettings,
+  RemoteHost,
   ShellConfig,
 } from '@shared/types';
 import type { ClaudeEffort, CommonAISettings } from '@shared/types/ai';
@@ -364,6 +365,12 @@ export interface SettingsState {
   // Git Clone Settings
   gitClone: GitCloneSettings;
 
+  // SSH Remote Development
+  remoteHosts: RemoteHost[];
+  remoteCacheRoot?: string; // Override default `userData/remote-cache`, undefined = use default
+  largeFileThresholdBytes: number; // For remote project large file protection (default 5MB)
+  remoteMirrorMaxBytes: number; // Maximum project mirror size before block (default 500MB)
+
   // Beta features
   todoEnabled: boolean; // Enable Todo kanban board (Beta)
   glowEffectEnabled: boolean; // Enable glow animation effect for AI output states (Beta)
@@ -503,6 +510,14 @@ export interface SettingsState {
     oldPattern: string,
     updates: Partial<import('@shared/types').GitHostMapping>
   ) => void;
+
+  // Setters - SSH Remote Development
+  setRemoteHosts: (hosts: RemoteHost[]) => void;
+  upsertRemoteHost: (host: RemoteHost) => void;
+  removeRemoteHost: (hostId: string) => void;
+  setRemoteCacheRoot: (path: string | undefined) => void;
+  setLargeFileThresholdBytes: (bytes: number) => void;
+  setRemoteMirrorMaxBytes: (bytes: number) => void;
 
   // Setters - Beta features
   setTodoEnabled: (enabled: boolean) => void;

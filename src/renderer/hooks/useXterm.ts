@@ -58,6 +58,8 @@ export interface UseXtermOptions {
    *  Used for TUI apps (e.g. DeepSeek-TUI) that use alternate screen buffer
    *  and handle scrolling internally via arrow keys when the composer is empty. */
   wheelAsArrow?: boolean;
+  /** SSH host ID — when set, uses sshTerminal IPC instead of local terminal */
+  sshHostId?: string;
 }
 
 export interface UseXtermResult {
@@ -138,6 +140,7 @@ export function useXterm({
   canMerge = false,
   preserveScreenOnClear = false,
   wheelAsArrow = false,
+  sshHostId,
 }: UseXtermOptions): UseXtermResult {
   const containerRef = useRef<HTMLDivElement>(null);
   const terminalRef = useRef<Terminal | null>(null);
@@ -210,12 +213,19 @@ export function useXterm({
   const fit = useCallback(() => {
     if (fitAddonRef.current && terminalRef.current && ptyIdRef.current) {
       fitAddonRef.current.fit();
-      window.electronAPI.terminal.resize(ptyIdRef.current, {
-        cols: terminalRef.current.cols,
-        rows: terminalRef.current.rows,
-      });
+      if (sshHostId) {
+        window.electronAPI.sshTerminal.resize(ptyIdRef.current, {
+          cols: terminalRef.current.cols,
+          rows: terminalRef.current.rows,
+        });
+      } else {
+        window.electronAPI.terminal.resize(ptyIdRef.current, {
+          cols: terminalRef.current.cols,
+          rows: terminalRef.current.rows,
+        });
+      }
     }
-  }, []);
+  }, [sshHostId]);
 
   const findNext = useCallback(
     (
@@ -654,19 +664,34 @@ export function useXterm({
 
     try {
       const createRequestId = ++createRequestIdRef.current;
-      const ptyId = await window.electronAPI.terminal.create({
-        cwd: cwd || window.electronAPI.env.HOME,
-        // If command is provided (e.g., for agent), use shell/args directly
-        // Otherwise, use shellConfig from settings
-        ...(command ? { shell: command.shell, args: command.args } : { shellConfig }),
-        cols: terminal.cols,
-        rows: terminal.rows,
-        env,
-        initialCommand: initialCommandRef.current,
-      });
+      const isSsh = !!sshHostId;
+
+      let ptyId: string;
+      if (isSsh) {
+        ptyId = await window.electronAPI.sshTerminal.create(sshHostId!, {
+          cwd: cwd || undefined,
+          cols: terminal.cols,
+          rows: terminal.rows,
+        });
+      } else {
+        ptyId = await window.electronAPI.terminal.create({
+          cwd: cwd || window.electronAPI.env.HOME,
+          // If command is provided (e.g., for agent), use shell/args directly
+          // Otherwise, use shellConfig from settings
+          ...(command ? { shell: command.shell, args: command.args } : { shellConfig }),
+          cols: terminal.cols,
+          rows: terminal.rows,
+          env,
+          initialCommand: initialCommandRef.current,
+        });
+      }
 
       if (isUnmountedRef.current || createRequestId !== createRequestIdRef.current) {
-        await window.electronAPI.terminal.destroy(ptyId).catch(() => {});
+        if (isSsh) {
+          await window.electronAPI.sshTerminal.destroy(ptyId).catch(() => {});
+        } else {
+          await window.electronAPI.terminal.destroy(ptyId).catch(() => {});
+        }
         return;
       }
 
@@ -677,7 +702,10 @@ export function useXterm({
 
       // Handle data from pty with debounced buffering for smooth rendering
       // 30ms delay merges fragmented TUI packets (clear + write)
-      const cleanup = window.electronAPI.terminal.onData((event) => {
+      const onDataHandler = isSsh
+        ? window.electronAPI.sshTerminal.onData
+        : window.electronAPI.terminal.onData;
+      const cleanup = onDataHandler((event) => {
         if (event.id === ptyId) {
           // Buffer data
           writeBufferRef.current += event.data;
@@ -726,7 +754,10 @@ export function useXterm({
 
       // Handle exit - delay to ensure pending data events are received
       // then flush remaining buffer before calling onExit
-      const exitCleanup = window.electronAPI.terminal.onExit((event) => {
+      const onExitHandler = isSsh
+        ? window.electronAPI.sshTerminal.onExit
+        : window.electronAPI.terminal.onExit;
+      const exitCleanup = onExitHandler((event) => {
         if (event.id === ptyId) {
           // Wait for any pending data events to arrive (IPC race condition)
           setTimeout(() => {
@@ -746,7 +777,11 @@ export function useXterm({
       // Handle input
       terminal.onData((data) => {
         if (ptyIdRef.current) {
-          window.electronAPI.terminal.write(ptyIdRef.current, data);
+          if (isSsh) {
+            window.electronAPI.sshTerminal.write(ptyIdRef.current, data);
+          } else {
+            window.electronAPI.terminal.write(ptyIdRef.current, data);
+          }
         }
       });
 
@@ -760,7 +795,7 @@ export function useXterm({
       terminal.writeln(`\x1b[31mFailed to start terminal.\x1b[0m`);
       terminal.writeln(`\x1b[33mError: ${error}\x1b[0m`);
     }
-  }, [cwd, command, shellConfig, commandKey, terminalRenderer]);
+  }, [cwd, command, shellConfig, commandKey, terminalRenderer, sshHostId]);
 
   useEffect(() => {
     const shouldActivate = isActive || initialCommandRef.current;
@@ -796,7 +831,11 @@ export function useXterm({
       cleanupRef.current?.();
       exitCleanupRef.current?.();
       if (ptyIdRef.current) {
-        window.electronAPI.terminal.destroy(ptyIdRef.current);
+        if (sshHostId) {
+          window.electronAPI.sshTerminal.destroy(ptyIdRef.current);
+        } else {
+          window.electronAPI.terminal.destroy(ptyIdRef.current);
+        }
         ptyIdRef.current = null;
       }
       // Remove copy-on-selection listener before disposing terminal
@@ -822,7 +861,7 @@ export function useXterm({
       terminalRef.current?.dispose();
       terminalRef.current = null;
     };
-  }, []);
+  }, [sshHostId]);
 
   // Update settings dynamically
   useEffect(() => {
@@ -843,10 +882,17 @@ export function useXterm({
     const handleResize = () => {
       if (fitAddonRef.current && terminalRef.current && ptyIdRef.current) {
         fitAddonRef.current.fit();
-        window.electronAPI.terminal.resize(ptyIdRef.current, {
-          cols: terminalRef.current.cols,
-          rows: terminalRef.current.rows,
-        });
+        if (sshHostId) {
+          window.electronAPI.sshTerminal.resize(ptyIdRef.current, {
+            cols: terminalRef.current.cols,
+            rows: terminalRef.current.rows,
+          });
+        } else {
+          window.electronAPI.terminal.resize(ptyIdRef.current, {
+            cols: terminalRef.current.cols,
+            rows: terminalRef.current.rows,
+          });
+        }
         // Clear WebGL texture atlas on resize to prevent glitches
         const addon = rendererAddonRef.current;
         if (addon && 'clearTextureAtlas' in addon) {
@@ -888,12 +934,13 @@ export function useXterm({
       observer.disconnect();
       intersectionObserver.disconnect();
     };
-  }, []);
+  }, [sshHostId]);
 
   // Fit and focus when becoming active (only after loading completes)
   useEffect(() => {
     if (isActive && terminalRef.current && !isLoading) {
       requestAnimationFrame(() => {
+        // biome-ignore lint/suspicious/noFocusedTests: fit() is xterm resize function, not test focus
         fit();
         terminalRef.current?.focus();
       });
@@ -916,6 +963,7 @@ export function useXterm({
           }
           terminalRef.current?.refresh(0, terminalRef.current.rows - 1);
           if (isActive) {
+            // biome-ignore lint/suspicious/noFocusedTests: fit() is xterm resize function, not test focus
             fit();
           }
         });
@@ -933,6 +981,7 @@ export function useXterm({
         requestAnimationFrame(() => {
           terminalRef.current?.refresh(0, terminalRef.current.rows - 1);
           if (isActive) {
+            // biome-ignore lint/suspicious/noFocusedTests: fit() is xterm resize function, not test focus
             fit();
           }
         });

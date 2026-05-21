@@ -245,6 +245,7 @@ function RepositoryItem({
         isSyncing={isSyncing}
         onSync={onSync}
         onPublish={onPublish}
+        worktreePath={repository.path}
       />
     </div>
   );

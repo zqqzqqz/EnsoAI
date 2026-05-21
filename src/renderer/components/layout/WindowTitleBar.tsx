@@ -1,4 +1,13 @@
-import { ExternalLink, MoreHorizontal, RefreshCw, Settings, Terminal, X } from 'lucide-react';
+import {
+  AlertTriangle,
+  ExternalLink,
+  Globe,
+  MoreHorizontal,
+  RefreshCw,
+  Settings,
+  Terminal,
+  X,
+} from 'lucide-react';
 import { useCallback } from 'react';
 import logoImage from '@/assets/logo.png';
 import {
@@ -11,6 +20,7 @@ import {
 } from '@/components/ui/menu';
 import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
+import { useRemoteProjectsStore } from '@/stores/remoteProjects';
 import { WindowControls } from './WindowControls';
 
 // 平台检查在模块级别进行，避免在组件内部违反 Hooks 规则
@@ -18,14 +28,16 @@ const isMac = typeof window !== 'undefined' && window.electronAPI?.env?.platform
 
 interface WindowTitleBarProps {
   onOpenSettings?: () => void;
+  remoteLabel?: string | null;
 }
 
 /**
  * Custom title bar for frameless windows (Windows/Linux)
  * Modern minimal design with settings button and more menu
  */
-export function WindowTitleBar({ onOpenSettings }: WindowTitleBarProps) {
+export function WindowTitleBar({ onOpenSettings, remoteLabel }: WindowTitleBarProps) {
   const { t } = useI18n();
+  const syncFailures = useRemoteProjectsStore((s) => s.syncFailures);
 
   // 所有 hooks 必须在条件返回之前调用，遵循 React Hooks 规则
   const handleReload = useCallback(() => {
@@ -66,6 +78,24 @@ export function WindowTitleBar({ onOpenSettings }: WindowTitleBarProps) {
       >
         <img src={logoImage} alt="Enso AI" className="h-5 w-5" />
         <span className="text-xs font-medium text-muted-foreground">Enso AI</span>
+        {remoteLabel && (
+          <>
+            <span className="text-xs text-muted-foreground/50">|</span>
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              <Globe className="h-3 w-3" />
+              <span className="max-w-[200px] truncate">{remoteLabel}</span>
+            </span>
+          </>
+        )}
+        {syncFailures.length > 0 && (
+          <span
+            className="flex items-center gap-1 text-xs text-warning"
+            title={`${syncFailures.length} upload(s) failed: ${syncFailures.map((f) => f.error).join(', ')}`}
+          >
+            <AlertTriangle className="h-3 w-3" />
+            <span>{syncFailures.length}</span>
+          </span>
+        )}
       </button>
 
       {/* Right: Actions and window controls */}

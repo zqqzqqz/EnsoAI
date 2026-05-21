@@ -24,6 +24,7 @@ import {
   FileConflictDialog,
 } from './FileConflictDialog';
 import { FileTree } from './FileTree';
+import { LargeFileAlertDialog } from './LargeFileAlertDialog';
 import { NewItemDialog } from './NewItemDialog';
 
 interface FileSidebarProps {
@@ -65,7 +66,17 @@ export function FileSidebar({
     revealFile,
   } = useFileTree({ rootPath, enabled: !!rootPath, isActive });
 
-  const { tabs, activeTab, loadFile, closeFile, setActiveFile, navigateToFile } = useEditor();
+  const {
+    tabs,
+    activeTab,
+    loadFile,
+    closeFile,
+    setActiveFile,
+    navigateToFile,
+    largeFileState,
+    confirmOpenLargeFile,
+    cancelOpenLargeFile,
+  } = useEditor();
 
   const [newItemType, setNewItemType] = useState<NewItemType>(null);
   const [newItemParentPath, setNewItemParentPath] = useState<string>('');
@@ -482,6 +493,11 @@ export function FileSidebar({
             conflicts={conflicts}
             onResolve={handleConflictResolve}
             onCancel={handleConflictCancel}
+          />
+          <LargeFileAlertDialog
+            state={largeFileState}
+            onConfirm={confirmOpenLargeFile}
+            onCancel={cancelOpenLargeFile}
           />
         </motion.aside>
       )}

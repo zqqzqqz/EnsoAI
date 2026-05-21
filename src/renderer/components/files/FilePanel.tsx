@@ -35,6 +35,7 @@ import {
   FileConflictDialog,
 } from './FileConflictDialog';
 import { FileTree } from './FileTree';
+import { LargeFileAlertDialog } from './LargeFileAlertDialog';
 import { NewItemDialog } from './NewItemDialog';
 import type { UnsavedChangesChoice } from './UnsavedChangesDialog';
 
@@ -93,6 +94,9 @@ export function FilePanel({ rootPath, isActive = false }: FilePanelProps) {
     setPendingCursor,
     navigateToFile,
     refreshFileContent,
+    largeFileState,
+    confirmOpenLargeFile,
+    cancelOpenLargeFile,
   } = useEditor();
 
   const [newItemType, setNewItemType] = useState<NewItemType>(null);
@@ -857,6 +861,13 @@ export function FilePanel({ rootPath, isActive = false }: FilePanelProps) {
         rootPath={rootPath}
         initialMode={searchMode}
         onOpenFile={handleSearchOpenFile}
+      />
+
+      {/* Large File Alert Dialog */}
+      <LargeFileAlertDialog
+        state={largeFileState}
+        onConfirm={confirmOpenLargeFile}
+        onCancel={cancelOpenLargeFile}
       />
     </div>
   );

@@ -653,6 +653,7 @@ function WorktreeItem({
             isSyncing={isSyncing}
             onSync={handleSync}
             onPublish={handlePublish}
+            worktreePath={worktree.path}
           />
         </div>
 

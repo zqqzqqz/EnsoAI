@@ -90,6 +90,7 @@ import { initAgentTasksListener, useAgentTasksStore } from './stores/agentTasks'
 import { initCloneProgressListener } from './stores/cloneTasks';
 import { useEditorStore } from './stores/editor';
 import { useInitScriptStore } from './stores/initScript';
+import { useRemoteProjectsStore } from './stores/remoteProjects';
 import { useSettingsStore } from './stores/settings';
 import { useTempWorkspaceStore } from './stores/tempWorkspace';
 import { useWorktreeStore } from './stores/worktree';
@@ -1054,7 +1055,16 @@ export default function App() {
     <div className="relative z-0 flex h-screen flex-col overflow-hidden">
       <BackgroundLayer />
       {/* Custom Title Bar for Windows/Linux */}
-      <WindowTitleBar onOpenSettings={openSettings} />
+      <WindowTitleBar
+        onOpenSettings={openSettings}
+        remoteLabel={
+          activeWorktree?.path
+            ? (useRemoteProjectsStore
+                .getState()
+                .projects.find((p) => activeWorktree.path.startsWith(p.localPath))?.alias ?? null)
+            : null
+        }
+      />
 
       {/* DevTools Overlay for macOS traffic lights protection */}
       <DevToolsOverlay />

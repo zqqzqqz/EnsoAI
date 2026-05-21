@@ -30,6 +30,7 @@ import {
   GroupSelector,
   MoveToGroupSubmenu,
 } from '@/components/group';
+import { RemoteHostSection } from '@/components/remote/RemoteHostSection';
 import { RepositorySettingsDialog } from '@/components/repository/RepositorySettingsDialog';
 import {
   AlertDialog,
@@ -651,6 +652,9 @@ export function RepositorySidebar({
           </LayoutGroup>
         )}
       </div>
+
+      {/* Remote Host Section — SSH hosts */}
+      <RemoteHostSection />
 
       {/* Footer */}
       <div className="shrink-0 border-t p-2">

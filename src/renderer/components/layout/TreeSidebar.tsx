@@ -1831,6 +1831,7 @@ function WorktreeTreeItem({
           isSyncing={isSyncing}
           onSync={handleSync}
           onPublish={handlePublish}
+          worktreePath={worktree.path}
         />
         {/* Activity counts */}
         <div className="flex items-center gap-1.5 shrink-0 text-[10px] text-muted-foreground">

@@ -261,6 +261,10 @@ export const defaultRemoteShareSettings: RemoteShareSettings = {
   boreServer: 'bore.pub',
 };
 
+// Default SSH Remote Development thresholds
+export const DEFAULT_LARGE_FILE_THRESHOLD_BYTES = 5 * 1024 * 1024; // 5 MB
+export const DEFAULT_REMOTE_MIRROR_MAX_BYTES = 500 * 1024 * 1024; // 500 MB
+
 // Default proxy settings
 export const defaultProxySettings: ProxySettings = {
   enabled: false,

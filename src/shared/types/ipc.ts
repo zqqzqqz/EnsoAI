@@ -79,6 +79,7 @@ export const IPC_CHANNELS = {
 
   // Files
   FILE_READ: 'file:read',
+  FILE_STAT: 'file:stat',
   FILE_WRITE: 'file:write',
   FILE_SAVE_TO_TEMP: 'file:save-to-temp',
   FILE_CREATE: 'file:create',
@@ -105,6 +106,7 @@ export const IPC_CHANNELS = {
   TERMINAL_DATA: 'terminal:data',
   TERMINAL_EXIT: 'terminal:exit',
   TERMINAL_GET_ACTIVITY: 'terminal:getActivity',
+  SSH_TERMINAL_DESTROY: 'ssh:terminal:destroy',
 
   // Agent
   AGENT_LIST: 'agent:list',
@@ -296,6 +298,41 @@ export const IPC_CHANNELS = {
   LOG_UPDATE_CONFIG: 'log:update-config',
   LOG_OPEN_FOLDER: 'log:open-folder',
   LOG_GET_PATH: 'log:get-path',
+
+  // SSH Remote — Host management
+  SSH_HOST_LIST: 'ssh:host:list',
+  SSH_HOST_SAVE: 'ssh:host:save',
+  SSH_HOST_DELETE: 'ssh:host:delete',
+  SSH_HOST_TEST: 'ssh:host:test',
+  SSH_HOST_CONNECT: 'ssh:host:connect',
+  SSH_HOST_DISCONNECT: 'ssh:host:disconnect',
+  SSH_HOST_STATUS: 'ssh:host:status',
+  SSH_HOST_VERIFY_KEY_REQUEST: 'ssh:host:verifyKey:request',
+  SSH_HOST_VERIFY_KEY_RESPONSE: 'ssh:host:verifyKey:response',
+  SSH_HOST_CREDENTIAL_META: 'ssh:host:credentialMeta',
+
+  // SSH Remote — Filesystem (SFTP)
+  SSH_FS_READ_DIR: 'ssh:fs:readDir',
+  SSH_FS_STAT: 'ssh:fs:stat',
+  SSH_FS_READ_FILE: 'ssh:fs:readFile',
+
+  // SSH Remote — Sync engine
+  SSH_SYNC_ESTIMATE: 'ssh:sync:estimate',
+  SSH_SYNC_MIRROR: 'ssh:sync:mirror',
+  SSH_SYNC_PROGRESS: 'ssh:sync:progress',
+  SSH_SYNC_CANCEL: 'ssh:sync:cancel',
+  SSH_SYNC_UPLOAD: 'ssh:sync:upload',
+  SSH_SYNC_QUEUE_STATUS: 'ssh:sync:queueStatus',
+
+  // SSH Terminal
+
+  // SSH Remote — Terminal (PTY over ssh2.shell)
+  SSH_TERMINAL_CREATE: 'ssh:terminal:create',
+  SSH_TERMINAL_WRITE: 'ssh:terminal:write',
+  SSH_TERMINAL_RESIZE: 'ssh:terminal:resize',
+  SSH_TERMINAL_DATA: 'ssh:terminal:data',
+  SSH_TERMINAL_CLOSE: 'ssh:terminal:close',
+  SSH_TERMINAL_EXIT: 'ssh:terminal:exit',
 } as const;
 
 export type IpcChannel = (typeof IPC_CHANNELS)[keyof typeof IPC_CHANNELS];

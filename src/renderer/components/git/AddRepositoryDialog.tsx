@@ -1,9 +1,17 @@
-import type { CloneProgress, RecentEditorProject, ValidateLocalPathResult } from '@shared/types';
-import { FolderOpen, Globe, Loader2, Minus, Plus } from 'lucide-react';
+import type {
+  CloneProgress,
+  RecentEditorProject,
+  RemoteHost,
+  SyncEstimateResult,
+  ValidateLocalPathResult,
+} from '@shared/types';
+import { FolderOpen, Globe, Loader2, Minus, Pencil, Plus, Server } from 'lucide-react';
 import { matchSorter } from 'match-sorter';
 import * as React from 'react';
 import type { RepositoryGroup } from '@/App/constants';
 import { CreateGroupDialog } from '@/components/group';
+import { RemoteDirectoryPicker } from '@/components/remote/RemoteDirectoryPicker';
+import { SshHostDialog } from '@/components/remote/SshHostDialog';
 import {
   Autocomplete,
   AutocompleteEmpty,
@@ -40,9 +48,10 @@ import { useI18n } from '@/i18n';
 import { generateClonePath } from '@/lib/gitClone';
 import { Z_INDEX } from '@/lib/z-index';
 import { useCloneTasksStore } from '@/stores/cloneTasks';
+import { useRemoteProjectsStore } from '@/stores/remoteProjects';
 import { useSettingsStore } from '@/stores/settings';
 
-type AddMode = 'local' | 'remote';
+type AddMode = 'local' | 'remote' | 'ssh';
 
 interface AddRepositoryDialogProps {
   open: boolean;
@@ -152,6 +161,16 @@ export function AddRepositoryDialog({
 
   // Create group dialog state
   const [createGroupDialogOpen, setCreateGroupDialogOpen] = React.useState(false);
+
+  // SSH tab state
+  const remoteHosts = useSettingsStore((s) => s.remoteHosts);
+  const [sshHostDialogOpen, setSshHostDialogOpen] = React.useState(false);
+  const [sshEditHost, setSshEditHost] = React.useState<RemoteHost | null>(null);
+  const [sshPickerHost, setSshPickerHost] = React.useState<RemoteHost | null>(null);
+  const [sshPickerOpen, setSshPickerOpen] = React.useState(false);
+  const [_sshMirroring, setSshMirroring] = React.useState(false);
+  const [_sshEstimate, setSshEstimate] = React.useState<SyncEstimateResult | null>(null);
+  const addRemoteProject = useRemoteProjectsStore((s) => s.addProject);
 
   // Validate URL and extract repo name when URL changes
   React.useEffect(() => {
@@ -524,6 +543,10 @@ export function AddRepositoryDialog({
                   <Globe className="mr-2 h-4 w-4" />
                   {t('Remote')}
                 </TabsTrigger>
+                <TabsTrigger value="ssh" className="flex-1" disabled={isCloning}>
+                  <Server className="mr-2 h-4 w-4" />
+                  {t('SSH')}
+                </TabsTrigger>
               </TabsList>
 
               {/* Local Repository Tab */}
@@ -684,6 +707,73 @@ export function AddRepositoryDialog({
                   </div>
                 )}
               </TabsContent>
+
+              {/* SSH Remote Host Tab */}
+              <TabsContent value="ssh" className="mt-4 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">
+                    {t('Connect to a remote server via SSH')}
+                  </span>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setSshEditHost(null);
+                      setSshHostDialogOpen(true);
+                    }}
+                  >
+                    <Plus className="mr-1 h-3.5 w-3.5" />
+                    {t('New Host')}
+                  </Button>
+                </div>
+
+                {remoteHosts.length === 0 ? (
+                  <div className="flex flex-col items-center gap-2 py-8 text-center">
+                    <Server className="h-8 w-8 text-muted-foreground/50" />
+                    <p className="text-sm text-muted-foreground">
+                      {t('No SSH hosts configured. Click "New Host" to add one.')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-1">
+                    {remoteHosts.map((host) => (
+                      <div
+                        key={host.id}
+                        className="flex w-full items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-accent/50 transition-colors"
+                      >
+                        <button
+                          type="button"
+                          className="flex min-w-0 flex-1 items-center gap-3"
+                          onClick={() => {
+                            setSshPickerHost(host);
+                            setSshPickerOpen(true);
+                          }}
+                        >
+                          <Server className="h-4 w-4 shrink-0 text-muted-foreground" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium truncate">{host.alias}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              {host.user}@{host.host}:{host.port}
+                            </div>
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          className="shrink-0 rounded-sm p-1 text-muted-foreground hover:text-foreground transition-colors"
+                          onClick={() => {
+                            setSshEditHost(host);
+                            setSshHostDialogOpen(true);
+                          }}
+                          title={t('Edit Host')}
+                        >
+                          <Pencil className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
             </Tabs>
 
             {/* Error Display */}
@@ -720,6 +810,66 @@ export function AddRepositoryDialog({
         onOpenChange={setCreateGroupDialogOpen}
         onSubmit={handleCreateGroup}
       />
+
+      <SshHostDialog
+        open={sshHostDialogOpen}
+        onOpenChange={setSshHostDialogOpen}
+        editHost={sshEditHost}
+      />
+
+      {sshPickerHost && (
+        <RemoteDirectoryPicker
+          open={sshPickerOpen}
+          onOpenChange={setSshPickerOpen}
+          host={sshPickerHost}
+          onSelect={async (host, remotePath) => {
+            try {
+              setSshMirroring(true);
+              setError(null);
+
+              // Estimate size
+              const est = await window.electronAPI.ssh.sync.estimate(host.id, remotePath);
+              setSshEstimate(est);
+
+              if (est.tooLarge) {
+                setError(
+                  `Project too large (${(est.totalBytes / 1024 / 1024).toFixed(0)} MB exceeds 500 MB limit)`
+                );
+                setSshMirroring(false);
+                return;
+              }
+
+              // Compute local mirror path
+              const userData = await window.electronAPI.app.getPath('userData');
+              const hash = remotePath.replace(/[^\w]/g, '_').slice(0, 32);
+              const localPath = `${userData}/remote-cache/${host.alias}/${hash}`;
+
+              // Mirror
+              await window.electronAPI.ssh.sync.mirror(host.id, remotePath, localPath);
+
+              // Register as local repository
+              onAddLocal(localPath, null);
+
+              // Track as remote project
+              addRemoteProject({
+                id: `rp-${host.id}-${Date.now()}`,
+                hostId: host.id,
+                remotePath,
+                localPath,
+                alias: `${host.alias}:${remotePath.split('/').pop()}`,
+                openedAt: Date.now(),
+              });
+
+              handleClose();
+            } catch (err) {
+              setError((err as Error).message);
+            } finally {
+              setSshMirroring(false);
+              setSshEstimate(null);
+            }
+          }}
+        />
+      )}
     </Dialog>
   );
 }

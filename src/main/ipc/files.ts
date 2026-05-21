@@ -12,6 +12,31 @@ import {
   unregisterAllowedLocalFileRootsByOwner,
 } from '../services/files/LocalFileAccess';
 import { createSimpleGit, normalizeGitRelativePath } from '../services/git/runtime';
+import * as RemoteSync from '../services/ssh/RemoteSync';
+
+// SSH write-back: check if a saved file is inside remote-cache and enqueue upload
+const remoteCacheRoot = join(app.getPath('userData'), 'remote-cache');
+
+function trySshWriteBack(filePath: string): void {
+  const normalized = filePath.replace(/\\/g, '/');
+  const cacheRoot = remoteCacheRoot.replace(/\\/g, '/');
+  if (!normalized.startsWith(`${cacheRoot}/`)) return;
+
+  // Path structure: remote-cache/<hostAlias>/<hash>/<relative...>
+  const relative = normalized.slice(cacheRoot.length + 1);
+  const parts = relative.split('/');
+  if (parts.length < 3) return;
+
+  const hostAlias = parts[0];
+  // We don't have hostId directly, but we can derive remotePath from the mirror structure.
+  // For now, use a simplified mapping — the full implementation in T-026 will use RemoteProject store.
+  const _localBase = join(cacheRoot, hostAlias, parts[1]);
+  const remoteRelative = parts.slice(2).join('/');
+
+  // TODO: resolve hostId from RemoteProject store (T-026)
+  // For now, this is a placeholder that will be wired up properly
+  RemoteSync.enqueueUpload(hostAlias, filePath, remoteRelative);
+}
 
 /**
  * Normalize encoding name to a consistent format
@@ -203,6 +228,18 @@ export function registerFileHandlers(): void {
     }
   );
 
+  ipcMain.handle(
+    IPC_CHANNELS.FILE_STAT,
+    async (_, filePath: string): Promise<{ size: number } | null> => {
+      try {
+        const stats = await stat(filePath);
+        return { size: stats.size };
+      } catch {
+        return null;
+      }
+    }
+  );
+
   ipcMain.handle(IPC_CHANNELS.FILE_READ, async (_, filePath: string): Promise<FileReadResult> => {
     // Design Decision: Binary File Detection
     // ----------------------------------------
@@ -253,6 +290,9 @@ export function registerFileHandlers(): void {
       const targetEncoding = encoding || 'utf-8';
       const buffer = iconv.encode(content, targetEncoding);
       await writeFile(filePath, buffer);
+
+      // SSH write-back hook: if file is inside remote-cache, enqueue upload
+      trySshWriteBack(filePath);
     }
   );
 

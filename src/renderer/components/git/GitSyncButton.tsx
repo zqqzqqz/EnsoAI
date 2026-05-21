@@ -1,6 +1,7 @@
 import { ArrowDown, ArrowUp, CloudUpload, Loader2 } from 'lucide-react';
 import { useI18n } from '@/i18n';
 import { cn } from '@/lib/utils';
+import { useRemoteProjectsStore } from '@/stores/remoteProjects';
 
 interface GitSyncButtonProps {
   ahead: number;
@@ -11,6 +12,7 @@ interface GitSyncButtonProps {
   onSync?: () => void;
   onPublish?: () => void;
   className?: string;
+  worktreePath?: string;
 }
 
 /**
@@ -26,8 +28,13 @@ export function GitSyncButton({
   onSync,
   onPublish,
   className,
+  worktreePath,
 }: GitSyncButtonProps) {
   const { t } = useI18n();
+
+  const isRemoteProject =
+    worktreePath &&
+    useRemoteProjectsStore.getState().projects.some((p) => worktreePath.startsWith(p.localPath));
 
   // Publish Button - when no upstream
   if (!tracking && currentBranch && onPublish) {
@@ -43,7 +50,11 @@ export function GitSyncButton({
           'flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50',
           className
         )}
-        title={t('Publish branch to remote')}
+        title={
+          isRemoteProject
+            ? t('Publish branch to git origin (not SSH remote)')
+            : t('Publish branch to remote')
+        }
       >
         {isSyncing ? (
           <Loader2 className="h-3 w-3 animate-spin" />
@@ -71,7 +82,7 @@ export function GitSyncButton({
           'flex items-center gap-1 rounded-md px-2 py-1 text-xs text-muted-foreground hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50',
           className
         )}
-        title={t('Sync with remote')}
+        title={isRemoteProject ? t('Sync with git origin (not SSH remote)') : t('Sync with remote')}
       >
         {isSyncing ? (
           <Loader2 className="h-3 w-3 animate-spin" />

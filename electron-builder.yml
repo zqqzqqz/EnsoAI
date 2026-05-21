@@ -78,6 +78,7 @@ asar: true
 asarUnpack:
   - "node_modules/@vscode/ripgrep/bin/**"
   - "node_modules/sqlite3/**"
+  - "node_modules/ssh2/**"
 compression: maximum
 
 mac:

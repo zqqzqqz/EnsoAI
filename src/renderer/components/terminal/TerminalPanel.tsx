@@ -15,6 +15,7 @@ import { defaultDarkTheme, getXtermTheme } from '@/lib/ghosttyTheme';
 import { matchesKeybinding } from '@/lib/keybinding';
 import { cn } from '@/lib/utils';
 import { useInitScriptStore } from '@/stores/initScript';
+import { useRemoteProjectsStore } from '@/stores/remoteProjects';
 import { useSettingsStore } from '@/stores/settings';
 import { useTerminalStore } from '@/stores/terminal';
 import { useWorktreeActivityStore } from '@/stores/worktreeActivity';
@@ -54,6 +55,12 @@ type WorktreeGroupStates = Record<string, GroupState>;
 
 export function TerminalPanel({ repoPath, cwd, isActive = false }: TerminalPanelProps) {
   const { t } = useI18n();
+
+  // Detect remote project for SSH terminal
+  const remoteProject = cwd
+    ? useRemoteProjectsStore.getState().projects.find((p) => cwd.startsWith(p.localPath))
+    : null;
+
   const [worktreeStates, setWorktreeStates] = useState<WorktreeGroupStates>({});
   // Global terminal IDs to keep terminals mounted across group moves
   const [globalTerminalIds, setGlobalTerminalIds] = useState<Set<string>>(new Set());
@@ -945,6 +952,7 @@ export function TerminalPanel({ repoPath, cwd, isActive = false }: TerminalPanel
                       onTitleChange={(title) => handleTitleChange(tabId, title)}
                       onSplit={() => handleSplit(info.group.id)}
                       onMerge={() => handleMerge(info.group.id)}
+                      sshHostId={remoteProject?.hostId}
                     />
                   </div>
                 );

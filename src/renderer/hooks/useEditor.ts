@@ -1,7 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { isUnsupportedBinaryFile } from '@/components/files/fileIcons';
 import { useEditorStore } from '@/stores/editor';
+import { useRemoteProjectsStore } from '@/stores/remoteProjects';
+import { useSettingsStore } from '@/stores/settings';
+
+const PARTIAL_LINE_COUNT = 1000;
+
+export interface LargeFileState {
+  path: string;
+  size: number;
+}
 
 export function useEditor() {
   const {
@@ -23,6 +32,26 @@ export function useEditor() {
   } = useEditorStore();
 
   const queryClient = useQueryClient();
+  const [largeFileState, setLargeFileState] = useState<LargeFileState | null>(null);
+
+  const isRemoteProjectFile = useCallback((filePath: string) => {
+    return useRemoteProjectsStore.getState().projects.some((p) => filePath.startsWith(p.localPath));
+  }, []);
+
+  const checkFileSize = useCallback(
+    async (filePath: string): Promise<{ ok: boolean; size?: number }> => {
+      if (!isRemoteProjectFile(filePath)) return { ok: true };
+
+      const threshold = useSettingsStore.getState().largeFileThresholdBytes;
+      const stat = await window.electronAPI.file.stat(filePath);
+      if (!stat) return { ok: true };
+      if (stat.size > threshold) {
+        return { ok: false, size: stat.size };
+      }
+      return { ok: true };
+    },
+    [isRemoteProjectFile]
+  );
 
   // Background refresh: re-read file from disk and silently update store (only if tab is not dirty)
   const refreshFileContent = useCallback(
@@ -48,6 +77,12 @@ export function useEditor() {
 
   const loadFile = useMutation({
     mutationFn: async (path: string) => {
+      const sizeCheck = await checkFileSize(path);
+      if (!sizeCheck.ok) {
+        setLargeFileState({ path, size: sizeCheck.size! });
+        return { content: '', encoding: 'utf-8', isBinary: false, isLargeFile: true };
+      }
+
       const { content, encoding, isBinary } = await window.electronAPI.file.read(path);
       openFile({
         path,
@@ -91,6 +126,12 @@ export function useEditor() {
         refreshFileContent(path);
       } else {
         try {
+          const sizeCheck = await checkFileSize(path);
+          if (!sizeCheck.ok) {
+            setLargeFileState({ path, size: sizeCheck.size! });
+            return;
+          }
+
           const { content, encoding, isBinary } = await window.electronAPI.file.read(path);
           openFile({
             path,
@@ -109,8 +150,46 @@ export function useEditor() {
         setPendingCursor({ path, line, column, matchLength, previewMode });
       }
     },
-    [tabs, setActiveFile, openFile, setPendingCursor, refreshFileContent]
+    [tabs, setActiveFile, openFile, setPendingCursor, refreshFileContent, checkFileSize]
   );
+
+  // Large file dialog: open anyway
+  const confirmOpenLargeFile = useCallback(
+    async (mode: 'full' | 'partial') => {
+      const state = largeFileState;
+      if (!state) return;
+      setLargeFileState(null);
+
+      const { content, encoding, isBinary } = await window.electronAPI.file.read(state.path);
+
+      if (mode === 'partial') {
+        const lines = content.split('\n');
+        const truncated =
+          lines.slice(0, PARTIAL_LINE_COUNT).join('\n') +
+          `\n\n... (file too large, showing first ${PARTIAL_LINE_COUNT} lines)`;
+        openFile({
+          path: state.path,
+          content: truncated,
+          encoding,
+          isDirty: false,
+          isUnsupported: isUnsupportedBinaryFile(state.path, isBinary),
+        });
+      } else {
+        openFile({
+          path: state.path,
+          content,
+          encoding,
+          isDirty: false,
+          isUnsupported: isUnsupportedBinaryFile(state.path, isBinary),
+        });
+      }
+    },
+    [largeFileState, openFile]
+  );
+
+  const cancelOpenLargeFile = useCallback(() => {
+    setLargeFileState(null);
+  }, []);
 
   const activeTab = tabs.find((f) => f.path === activeTabPath) || null;
 
@@ -132,5 +211,8 @@ export function useEditor() {
     setPendingCursor,
     navigateToFile,
     refreshFileContent,
+    largeFileState,
+    confirmOpenLargeFile,
+    cancelOpenLargeFile,
   };
 }

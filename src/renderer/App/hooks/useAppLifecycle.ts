@@ -6,10 +6,34 @@ export function useAppLifecycle(setCloseDialogOpen: (open: boolean) => void) {
   const pendingRequestIdRef = useRef<string | null>(null);
 
   // Called by the close confirmation dialog when user confirms
-  const confirmCloseAndRespond = useCallback(() => {
+  const confirmCloseAndRespond = useCallback(async () => {
     const requestId = pendingRequestIdRef.current;
     if (!requestId) return;
     pendingRequestIdRef.current = null;
+
+    // Check for pending SSH sync uploads
+    try {
+      const hosts = useSettingsStore.getState().remoteHosts;
+      let hasPending = false;
+      for (const host of hosts) {
+        const status = await window.electronAPI.ssh.sync.getQueueStatus(host.id);
+        if (status && status.pending > 0) {
+          hasPending = true;
+          break;
+        }
+      }
+      if (hasPending) {
+        const confirmed = window.confirm(
+          'There are pending file uploads to remote servers. Unsaved changes may be lost. Continue closing?'
+        );
+        if (!confirmed) {
+          pendingRequestIdRef.current = requestId;
+          return;
+        }
+      }
+    } catch {
+      // If queue status check fails, proceed with close
+    }
 
     const state = useEditorStore.getState();
     const editorSettings = useSettingsStore.getState().editorSettings;

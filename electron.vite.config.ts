@@ -13,7 +13,7 @@ export default defineConfig({
     },
     build: {
       rollupOptions: {
-        external: ['node-pty', '@parcel/watcher'],
+        external: ['node-pty', '@parcel/watcher', 'ssh2', 'ssh2-sftp-client', 'cpu-features'],
       },
     },
   },

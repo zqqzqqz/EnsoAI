@@ -209,6 +209,23 @@ export function migrateSettings(
       ...currentState.quickTerminal,
       ...persisted.quickTerminal,
     },
+    // SSH Remote Development — ensure remoteHosts is always an array even when
+    // persisted state predates this feature or is corrupted to a non-array.
+    remoteHosts: Array.isArray(persisted.remoteHosts)
+      ? persisted.remoteHosts
+      : currentState.remoteHosts,
+    largeFileThresholdBytes: clampNumber(
+      persisted.largeFileThresholdBytes,
+      1024,
+      Number.MAX_SAFE_INTEGER,
+      currentState.largeFileThresholdBytes
+    ),
+    remoteMirrorMaxBytes: clampNumber(
+      persisted.remoteMirrorMaxBytes,
+      1024 * 1024,
+      Number.MAX_SAFE_INTEGER,
+      currentState.remoteMirrorMaxBytes
+    ),
   };
 }
 
