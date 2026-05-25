@@ -106,7 +106,6 @@ export const IPC_CHANNELS = {
   TERMINAL_DATA: 'terminal:data',
   TERMINAL_EXIT: 'terminal:exit',
   TERMINAL_GET_ACTIVITY: 'terminal:getActivity',
-  SSH_TERMINAL_DESTROY: 'ssh:terminal:destroy',
 
   // Agent
   AGENT_LIST: 'agent:list',
@@ -323,6 +322,11 @@ export const IPC_CHANNELS = {
   SSH_SYNC_CANCEL: 'ssh:sync:cancel',
   SSH_SYNC_UPLOAD: 'ssh:sync:upload',
   SSH_SYNC_QUEUE_STATUS: 'ssh:sync:queueStatus',
+  SSH_SYNC_START_WATCH: 'ssh:sync:startWatch',
+  SSH_SYNC_RECONCILE: 'ssh:sync:reconcile',
+  SSH_SYNC_RETRY_FAILED: 'ssh:sync:retryFailed',
+  SSH_SYNC_FLUSH_WATCH: 'ssh:sync:flushWatch',
+  SSH_SYNC_FAILURE: 'ssh:sync:failure',
 
   // SSH Terminal
 

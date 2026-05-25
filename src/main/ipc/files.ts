@@ -12,30 +12,34 @@ import {
   unregisterAllowedLocalFileRootsByOwner,
 } from '../services/files/LocalFileAccess';
 import { createSimpleGit, normalizeGitRelativePath } from '../services/git/runtime';
+import { resolveRemoteFile } from '../services/ssh/RemoteProjectsRegistry';
 import * as RemoteSync from '../services/ssh/RemoteSync';
 
-// SSH write-back: check if a saved file is inside remote-cache and enqueue upload
-const remoteCacheRoot = join(app.getPath('userData'), 'remote-cache');
-
 function trySshWriteBack(filePath: string): void {
-  const normalized = filePath.replace(/\\/g, '/');
-  const cacheRoot = remoteCacheRoot.replace(/\\/g, '/');
-  if (!normalized.startsWith(`${cacheRoot}/`)) return;
+  const resolved = resolveRemoteFile(filePath);
+  if (!resolved) return;
 
-  // Path structure: remote-cache/<hostAlias>/<hash>/<relative...>
-  const relative = normalized.slice(cacheRoot.length + 1);
-  const parts = relative.split('/');
-  if (parts.length < 3) return;
+  RemoteSync.enqueueUpload(resolved.project.hostId, filePath, resolved.remotePath);
+}
 
-  const hostAlias = parts[0];
-  // We don't have hostId directly, but we can derive remotePath from the mirror structure.
-  // For now, use a simplified mapping — the full implementation in T-026 will use RemoteProject store.
-  const _localBase = join(cacheRoot, hostAlias, parts[1]);
-  const remoteRelative = parts.slice(2).join('/');
+function trySshDelete(filePath: string): void {
+  const resolved = resolveRemoteFile(filePath);
+  if (!resolved) return;
 
-  // TODO: resolve hostId from RemoteProject store (T-026)
-  // For now, this is a placeholder that will be wired up properly
-  RemoteSync.enqueueUpload(hostAlias, filePath, remoteRelative);
+  RemoteSync.enqueueDelete(resolved.project.hostId, resolved.remotePath);
+}
+
+function trySshRename(fromPath: string, toPath: string): void {
+  const fromResolved = resolveRemoteFile(fromPath);
+  const toResolved = resolveRemoteFile(toPath);
+
+  // Source out, target in: delete source on remote, upload target on remote.
+  if (fromResolved) {
+    RemoteSync.enqueueDelete(fromResolved.project.hostId, fromResolved.remotePath);
+  }
+  if (toResolved) {
+    RemoteSync.enqueueUpload(toResolved.project.hostId, toPath, toResolved.remotePath);
+  }
 }
 
 /**
@@ -302,25 +306,31 @@ export function registerFileHandlers(): void {
       await mkdir(dirname(filePath), { recursive: true });
       const flag = options?.overwrite ? 'w' : 'wx';
       await writeFile(filePath, content, { encoding: 'utf-8', flag });
+      trySshWriteBack(filePath);
     }
   );
 
   ipcMain.handle(IPC_CHANNELS.FILE_CREATE_DIR, async (_, dirPath: string) => {
     await mkdir(dirPath, { recursive: true });
+    // Directory create on remote happens lazily on first child file upload;
+    // no explicit mkdir enqueue needed for empty dirs.
   });
 
   ipcMain.handle(IPC_CHANNELS.FILE_RENAME, async (_, fromPath: string, toPath: string) => {
     await rename(fromPath, toPath);
+    trySshRename(fromPath, toPath);
   });
 
   ipcMain.handle(IPC_CHANNELS.FILE_MOVE, async (_, fromPath: string, toPath: string) => {
     await rename(fromPath, toPath);
+    trySshRename(fromPath, toPath);
   });
 
   ipcMain.handle(
     IPC_CHANNELS.FILE_DELETE,
     async (_, targetPath: string, options?: { recursive?: boolean }) => {
       await rm(targetPath, { recursive: options?.recursive ?? true, force: false });
+      trySshDelete(targetPath);
     }
   );
 

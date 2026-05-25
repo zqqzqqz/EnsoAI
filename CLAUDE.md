@@ -26,7 +26,11 @@ pnpm lint                 # Biome lint check
 pnpm lint:fix             # Biome lint + auto-fix
 pnpm test                 # Vitest (single run)
 pnpm test:watch           # Vitest in watch mode
+pnpm test path/to/file.test.ts   # Run a single test file
+pnpm test -- -t "pattern"        # Filter by test name pattern
 ```
+
+Tests live alongside source in `__tests__/` subfolders (e.g. `src/main/services/git/__tests__/gitLogFormat.test.ts`). Coverage is sparse — add tests when touching pure logic, but don't expect a deep suite to lean on.
 
 Package manager: **pnpm 10.26.2** (pinned via `packageManager` field). Node.js 20+ required.
 
@@ -57,6 +61,13 @@ All IPC channels centralized in `src/shared/types/ipc.ts` (~160 channels, `domai
 - **Push events**: `webContents.send()` for terminal data, file changes, clone progress, etc.
 
 Key IPC domains: `git`, `worktree`, `files`, `terminal`, `agent`, `settings`, `ai`, `claude`, `todo`, `remoteShare`
+
+#### Adding a new IPC channel (4 coordinated edits — easy to miss step 3)
+
+1. Add the channel name to `src/shared/types/ipc.ts`
+2. Create handler in `src/main/ipc/<domain>.ts` exporting `registerXxxHandlers()`
+3. **Call `registerXxxHandlers()` from `src/main/ipc/index.ts`** — silent no-op if you forget
+4. Add typed wrapper in `src/preload/index.ts` under `electronAPI`
 
 ### Main Process Services (`src/main/services/`)
 
@@ -106,6 +117,8 @@ Each service has a matching IPC handler in `src/main/ipc/*.ts` (e.g. `git.ts`, `
 
 Store pattern: `create<State>((set, get) => ({...}))` with flat state and setter actions. Only `settings` uses `persist` middleware. `agentTasksEquality.ts` is a helper module (not a store) used to short-circuit re-renders.
 
+Zustand holds **client state**; **server-fetched data** (worktree list, git branches, etc.) goes through `@tanstack/react-query`. `QueryClient` is initialized in `src/renderer/index.tsx`. Don't mirror React Query data into a Zustand store.
+
 ### Renderer Layout
 
 ```
@@ -129,6 +142,15 @@ Single file `src/preload/index.ts` (~1200 lines) — `contextBridge.exposeInMain
 In `electron.vite.config.ts`, the main-process build externalizes `node-pty` and `@parcel/watcher` (Rollup `external`). When adding a new native module that uses N-API or prebuilt binaries (e.g. `sqlite3`-style modules), add it to the `external` list, otherwise electron-vite will try to bundle the `.node` binary and the build will fail at runtime.
 
 `postinstall` runs `electron-builder install-app-deps` to rebuild native modules against the Electron ABI — re-run `pnpm install` after pulling changes that touch native deps.
+
+### Shutdown / Resource Cleanup (Critical Footgun)
+
+`src/main/ipc/index.ts` exposes two cleanup entry points:
+
+- `cleanupAllResources()` — async, used on normal app quit
+- `cleanupAllResourcesSync()` — used by signal handlers (SIGINT/SIGTERM)
+
+**PTY destruction must be awaited** via `destroyAllTerminalsAndWait()`. Skipping the `await` crashes Node on exit because pending `node-pty` writes fail after the event loop tears down. When adding any service that holds OS handles (PTYs, file watchers, sockets), wire its disposal into both cleanup paths.
 
 ## Code Conventions
 
@@ -183,4 +205,8 @@ Only `feat`, `fix`, `ci`, `build` appear in auto-generated Release Notes.
 | `src/preload/index.ts` | IPC bridge — add typed wrappers here when adding channels |
 | `src/renderer/stores/settings/` | Largest store with persistence and migrations — read carefully before modifying |
 | `src/main/services/claude/ClaudeIdeBridge.ts` | MCP/IDE integration core via WebSocket |
+| `src/main/ipc/index.ts` | IPC handler registration + shutdown cleanup orchestration |
+| `src/renderer/App.tsx` | Renderer orchestrator (~1100 lines, ~20 hooks) — modify with care |
+| `src/renderer/hooks/useXterm.ts` | Largest renderer hook (~26KB) — xterm.js setup and theme sync |
 | `docs/design-system.md` | Complete UI component patterns and styling rules |
+| `src/main/AGENTS.md` / `src/renderer/AGENTS.md` | Subtree-scoped guidance — read when working inside main/ or renderer/ |

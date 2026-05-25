@@ -833,7 +833,7 @@ export function AddRepositoryDialog({
 
               if (est.tooLarge) {
                 setError(
-                  `Project too large (${(est.totalBytes / 1024 / 1024).toFixed(0)} MB exceeds 500 MB limit)`
+                  `项目过大（${(est.totalBytes / 1024 / 1024).toFixed(0)} MB，超过 500 MB 限制）`
                 );
                 setSshMirroring(false);
                 return;

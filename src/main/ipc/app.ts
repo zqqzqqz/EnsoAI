@@ -1,12 +1,16 @@
 import type { ProxySettings } from '@shared/types';
 import { IPC_CHANNELS } from '@shared/types';
-import { ipcMain } from 'electron';
+import { app, ipcMain } from 'electron';
 import { appDetector } from '../services/app/AppDetector';
 import { validateLocalPath } from '../services/app/PathValidator';
 import { getRecentProjects } from '../services/app/RecentProjectsService';
 import { applyProxy, testProxy } from '../services/proxy/ProxyConfig';
 
 export function registerAppHandlers() {
+  ipcMain.handle(IPC_CHANNELS.APP_GET_PATH, async (_, name: Parameters<typeof app.getPath>[0]) => {
+    return app.getPath(name);
+  });
+
   ipcMain.handle(IPC_CHANNELS.APP_DETECT, async () => {
     return await appDetector.detectApps();
   });

@@ -3,6 +3,11 @@ export type Locale = 'en' | 'zh';
 export const zhTranslations: Record<string, string> = {
   'Action Panel': '操作面板',
   'Add Repository': '添加仓库',
+  'Connect to a remote server via SSH': '通过 SSH 连接到远程服务器',
+  'New Host': '新建主机',
+  'No SSH hosts configured. Click "New Host" to add one.':
+    '尚未配置 SSH 主机。点击“新建主机”添加一个。',
+  'Edit Host': '编辑主机',
   'Add Workspace': '新建工作区',
   'Add agent': '添加 Agent',
   'Add to favorites': '添加收藏',
@@ -253,6 +258,14 @@ export const zhTranslations: Record<string, string> = {
   Layout: '布局',
   'Last updated': '最近提交',
   Light: '浅色',
+  'Large File': '大文件',
+  'This file is {{size}}, which may cause the editor to lag. How would you like to proceed?':
+    '该文件大小为 {{size}}，可能导致编辑器卡顿。你想如何继续？',
+  "Don't Open": '不打开',
+  'View First 1000 Lines': '仅查看前 1000 行',
+  'Open Anyway': '仍然打开',
+  'Publish branch to git origin (not SSH remote)': '发布分支到 Git origin（不是 SSH 远程）',
+  'Sync with git origin (not SSH remote)': '与 Git origin 同步（不是 SSH 远程）',
   'List view': '列表视图',
   'Loading...': '加载中...',
   'Local branches': '本地分支',

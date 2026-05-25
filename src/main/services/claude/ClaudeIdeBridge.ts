@@ -394,6 +394,32 @@ export async function startClaudeIdeBridge(
               // Stop event - agent has finished or been stopped
               console.log(`[ClaudeIdeBridge] → completed (Stop) ${sessionId?.slice(0, 8)}`);
 
+              // SSH remote-project safety net: flush watcher debounce, run a full
+              // mtime/size reconcile, then retry any previously-failed uploads.
+              // Three-layer defence ensures no AI edit is left behind even if the
+              // local FS watcher dropped an event.
+              if (data.cwd) {
+                const cwd = data.cwd;
+                void (async () => {
+                  try {
+                    const ssh = await import('../ssh/RemoteSync');
+                    const watcher = await import('../ssh/GitWatcher');
+                    await watcher.flushWatch(cwd);
+                    const uploaded = await ssh.reconcileLocalDir(cwd);
+                    if (uploaded > 0) {
+                      console.log(
+                        `[ClaudeIdeBridge] Post-stop reconcile enqueued ${uploaded} file(s) for upload`
+                      );
+                    }
+                  } catch (err: unknown) {
+                    console.warn(
+                      '[ClaudeIdeBridge] Post-stop remote sync failed:',
+                      (err as Error).message
+                    );
+                  }
+                })();
+              }
+
               // Check for task completion marker in session log (async)
               let taskCompletionStatus: 'completed' | 'unknown' = 'unknown';
 

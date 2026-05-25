@@ -46,8 +46,10 @@ import type {
   SshConnectionState,
   SshTestConnectionResult,
   SyncEstimateResult,
+  SyncFailureEvent,
   SyncProgress,
   SyncQueueStatus,
+  SyncReconcileResult,
   TempWorkspaceCheckResult,
   TempWorkspaceCreateResult,
   TempWorkspaceRemoveResult,
@@ -433,8 +435,7 @@ const electronAPI = {
       ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_WRITE, id, data),
     resize: (id: string, size: { cols: number; rows: number }): Promise<void> =>
       ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_RESIZE, id, size),
-    destroy: (id: string): Promise<void> =>
-      ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_DESTROY, id),
+    destroy: (id: string): Promise<void> => ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_CLOSE, id),
     onData: (callback: (event: { id: string; data: string }) => void): (() => void) => {
       const handler = (_: unknown, event: { id: string; data: string }) => callback(event);
       ipcRenderer.on(IPC_CHANNELS.SSH_TERMINAL_DATA, handler);
@@ -1259,36 +1260,23 @@ const electronAPI = {
         ipcRenderer.on(IPC_CHANNELS.SSH_SYNC_QUEUE_STATUS, handler);
         return () => ipcRenderer.off(IPC_CHANNELS.SSH_SYNC_QUEUE_STATUS, handler);
       },
-    },
-    terminal: {
-      create: (opts: {
-        hostId: string;
-        cwd?: string;
-        cols?: number;
-        rows?: number;
-      }): Promise<{ sessionId: string }> =>
-        ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_CREATE, opts),
-      write: (sessionId: string, data: string): Promise<void> =>
-        ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_WRITE, sessionId, data),
-      resize: (sessionId: string, cols: number, rows: number): Promise<void> =>
-        ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_RESIZE, sessionId, cols, rows),
-      close: (sessionId: string): Promise<void> =>
-        ipcRenderer.invoke(IPC_CHANNELS.SSH_TERMINAL_CLOSE, sessionId),
-      onData: (callback: (payload: { sessionId: string; data: string }) => void): (() => void) => {
-        const handler = (_: unknown, payload: { sessionId: string; data: string }) =>
-          callback(payload);
-        ipcRenderer.on(IPC_CHANNELS.SSH_TERMINAL_DATA, handler);
-        return () => ipcRenderer.off(IPC_CHANNELS.SSH_TERMINAL_DATA, handler);
-      },
-      onExit: (
-        callback: (payload: { sessionId: string; code?: number; signal?: string }) => void
-      ): (() => void) => {
-        const handler = (
-          _: unknown,
-          payload: { sessionId: string; code?: number; signal?: string }
-        ) => callback(payload);
-        ipcRenderer.on(IPC_CHANNELS.SSH_TERMINAL_EXIT, handler);
-        return () => ipcRenderer.off(IPC_CHANNELS.SSH_TERMINAL_EXIT, handler);
+      startWatch: (hostId: string, localPath: string, remotePath: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_START_WATCH, hostId, localPath, remotePath),
+      reconcile: (
+        hostId: string,
+        localPath: string,
+        remotePath: string,
+        options?: { deleteExtraneous?: boolean }
+      ): Promise<SyncReconcileResult> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_RECONCILE, hostId, localPath, remotePath, options),
+      retryFailed: (hostId: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_RETRY_FAILED, hostId),
+      flushWatch: (localPath?: string): Promise<void> =>
+        ipcRenderer.invoke(IPC_CHANNELS.SSH_SYNC_FLUSH_WATCH, localPath),
+      onFailure: (callback: (event: SyncFailureEvent) => void): (() => void) => {
+        const handler = (_: unknown, event: SyncFailureEvent) => callback(event);
+        ipcRenderer.on(IPC_CHANNELS.SSH_SYNC_FAILURE, handler);
+        return () => ipcRenderer.off(IPC_CHANNELS.SSH_SYNC_FAILURE, handler);
       },
     },
   },

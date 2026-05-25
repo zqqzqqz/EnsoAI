@@ -56,6 +56,20 @@ function atomicWriteSettings(data: Record<string, unknown>): boolean {
   }
 }
 
+export function writeSettingsImmediate(data: Record<string, unknown>): boolean {
+  cachedSettings = data;
+  isDirty = false;
+  if (pendingWrite) {
+    clearTimeout(pendingWrite);
+    pendingWrite = null;
+  }
+  if (maxWaitTimer) {
+    clearTimeout(maxWaitTimer);
+    maxWaitTimer = null;
+  }
+  return atomicWriteSettings(data);
+}
+
 /**
  * 强制落盘（在退出前调用）
  */
